@@ -49,9 +49,19 @@ Every page is linked through the left nav, cards, fixture rows, breadcrumb and t
 
 ## What actually works
 
-**Living markets.** 1X2 odds on every live match drift every 3.2 seconds with a green/red flash and a delta arrow.
-Market groups on the match page move too. "Total goals", "Total cards" and "Both teams to score" take turns
-being suspended for 10 seconds — the odds turn striped, taps are rejected and the slip shows a warning.
+**No silent changes — odds heartbeat.** Every price carries a 60-second movement line at the bottom of its button,
+so a moved price is visible even after the flash fades. 1X2 odds on every live match drift every 3.2 seconds with a
+green/red flash and a delta arrow. Market groups on the match page move too. "Total goals", "Total cards" and
+"Both teams to score" take turns being suspended for 10 seconds — the odds turn striped with a live `Paused · 7s`
+countdown, taps are rejected and the slip shows "Reopens in 7s".
+
+**State lab — the judges' tool.** A built-in control panel (the `Lab` pill, bottom-left) that makes every required
+state verifiable in seconds instead of waiting for randomness:
+- `Odds movement → Paused` freezes prices, `Nudge prices now` applies one synthetic tick (watch the heartbeat move).
+- Four buttons pause a specific market for 10 seconds (goals, BTTS, cards, corners) with the countdown on screen.
+- `Next bet → Failure / Success` forces the bet-failure or placement path, then returns to Auto.
+- `Reset demo` clears local state.
+The panel is keyboard/Escape friendly, closes on outside click, and does not touch the product UI or data model.
 
 **Scores & clocks.** Match minutes advance on their own, goals can land, and matches that have not started show a
 real countdown that ticks down and flips the fixture to live.
@@ -92,10 +102,11 @@ with keyboard navigation and grouped results.
 ## Structure
 
 ```
-index.html            shell: top bar, rail, side panel, bottom bar, drawer, palette, icon sprite
-assets/app.css        design system + all components + 1320/1120/900/420 breakpoints
+index.html            shell: top bar, rail, side panel, bottom bar, drawer, palette, state lab, icon sprite
+assets/app.css        design system + all components + heartbeat + lab + 1320/1120/900/420 breakpoints
 assets/data.js        teams, competitions, 26 matches, 6 market groups, players, sample bets
-assets/app.js         hash router, localStorage store, odds/clock engine, slip, cash out, search
+assets/app.js         hash router, localStorage store, odds/clock engine, heartbeat history, slip, cash out, search, lab
+SUBMISSION.md         copy for the contest form: big idea, tools, page checklist
 ```
 
 ---
@@ -109,3 +120,4 @@ assets/app.js         hash router, localStorage store, odds/clock engine, slip, 
 - [x] Odds moving, markets suspended, odds changed must be accepted, selection suspended
 - [x] Bet placed & bet failed, cash out, open/settled history
 - [x] No multis/accumulators, boosts, promos, outrights, stats widgets or AI search
+- [x] Extras built for review: odds heartbeat, State lab, market reopen countdowns

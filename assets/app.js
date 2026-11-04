@@ -80,6 +80,7 @@
   state.bets.forEach((b) => {
     if (b.status === 'open' && !b.cashout) b.cashout = Math.round((b.cashoutBase || b.stake * b.odds * 0.85) * 100) / 100;
   });
+  const LAB = { oddsPaused: false, nextBet: 'auto' };
   let saveTimer;
   function save() {
     clearTimeout(saveTimer);
@@ -92,6 +93,44 @@
   const oddsIndex = new Map();
   let lastTick = Date.now();
 
+  const HISTORY_MS = 90000;
+  function seedHistory(v) {
+    const now = Date.now();
+    return Array.from({ length: 12 }, (_, i) => ({ t: now - (11 - i) * 6000, v }));
+  }
+  function pushHistory(src, v) {
+    if (!src || !src.history) return;
+    src.history.push({ t: Date.now(), v });
+    src.history = src.history.filter((p) => p.t > Date.now() - HISTORY_MS);
+  }
+  function sparkGeometry(src) {
+    if (!src || !src.history) return { points: '1,4 43,4', last: [43, 4] };
+    const now = Date.now();
+    const pts = src.history.filter((p) => p.t > now - 60000);
+    if (pts.length < 2) return { points: '1,4 43,4', last: [43, 4] };
+    const vals = pts.map((p) => p.v);
+    let min = Math.min(...vals), max = Math.max(...vals);
+    if (max - min < 0.02) { const c = (min + max) / 2; min = c - 0.05; max = c + 0.05; }
+    const W = 44, H = 8, PAD = 1;
+    const arr = pts.map((p) => [
+      PAD + (W - PAD * 2) * ((p.t - (now - 60000)) / 60000),
+      PAD + (H - PAD * 2) * (1 - (p.v - min) / (max - min)),
+    ]);
+    return {
+      points: arr.map((pt) => `${pt[0].toFixed(1)},${pt[1].toFixed(1)}`).join(' '),
+      last: arr[arr.length - 1],
+    };
+  }
+  function lastMoveDown(src) {
+    if (!src || !src.history || src.history.length < 2) return false;
+    const h = src.history;
+    return h[h.length - 1].v < h[h.length - 2].v;
+  }
+  function sparkMarkup(src) {
+    const g = sparkGeometry(src);
+    return `<svg class="spark ${lastMoveDown(src) ? 'trend-down' : ''}" viewBox="0 0 44 8" preserveAspectRatio="none" aria-hidden="true"><polyline points="${g.points}"/><circle cx="${g.last[0].toFixed(1)}" cy="${g.last[1].toFixed(1)}" r="1.15" fill="currentColor"/></svg>`;
+  }
+
   function registerOdds() {
     MATCHES.forEach((m) => {
       // 1X2
@@ -103,7 +142,7 @@
         oddsIndex.set(key, {
           matchId: m.id, selId: p, label: labels[p], marketName: 'Match result',
           get: () => m.odds[p], set: (v) => { m.odds[p] = v; },
-          isSusp: () => false,
+          isSusp: () => false, until: () => 0, history: seedHistory(m.odds[p]),
         });
       });
       // markets
@@ -116,7 +155,9 @@
               matchId: m.id, selId: sel.id, label: sel.label, marketName: g.name,
               get: () => sel.odds, set: (v) => { sel.odds = v; },
               isSusp: () => (sel._suspUntil || 0) > Date.now(),
+              until: () => sel._suspUntil || 0,
               raw: sel,
+              history: seedHistory(sel.odds),
             });
           });
         });
@@ -130,7 +171,8 @@
     return src ? Math.round(src.get() * 100) / 100 : 0;
   };
 
-  function driftOdds() {
+  function driftOdds(force) {
+    if (LAB.oddsPaused && !force) return;
     const delta = new Map();
     MATCHES.forEach((m) => {
       if (m.status !== 'live') return;
@@ -144,6 +186,7 @@
         const prev = m.odds[p];
         const step = (Math.random() * 0.06 + 0.01) * (Math.random() > 0.5 ? 1 : -1);
         m.odds[p] = clamp(Math.round((m.odds[p] + step) * 100) / 100, 1.05, 26);
+        pushHistory(oddsIndex.get(`${m.id}:${p}`), m.odds[p]);
         delta.set(`${m.id}:${p}`, m.odds[p] - prev);
       });
       // market selections: featured match only, to keep the screen calm
@@ -154,6 +197,7 @@
           const prev = sel.odds;
           const step = (Math.random() * 0.10 + 0.01) * (Math.random() > 0.5 ? 1 : -1);
           sel.odds = clamp(Math.round((sel.odds + step) * 100) / 100, 1.03, 41);
+          pushHistory(oddsIndex.get(`${m.id}:${sel.id}`), sel.odds);
           delta.set(`${m.id}:${sel.id}`, sel.odds - prev);
         })));
       }
@@ -184,14 +228,27 @@
           setTimeout(() => el.classList.remove('flash-up', 'flash-down'), 1100);
         }
       }
-      // suspended state
-      const susp = src.isSusp();
-      if (susp !== el.classList.contains('susp')) {
-        el.classList.toggle('susp', susp);
-        let tag = el.querySelector('.susp-tag');
-        if (susp && !tag) { tag = document.createElement('span'); tag.className = 'susp-tag'; tag.textContent = 'Suspended'; el.appendChild(tag); }
-        if (!susp && tag) tag.remove();
+      // heartbeat sparkline
+      const sp = el.querySelector('.spark');
+      if (sp) {
+        const g = sparkGeometry(src);
+        const poly = sp.querySelector('polyline');
+        if (poly) poly.setAttribute('points', g.points);
+        const dot = sp.querySelector('circle');
+        if (dot) { dot.setAttribute('cx', g.last[0].toFixed(1)); dot.setAttribute('cy', g.last[1].toFixed(1)); }
+        sp.classList.toggle('trend-down', lastMoveDown(src));
       }
+      // suspended state + live reopen countdown
+      const susp = src.isSusp();
+      el.classList.toggle('susp', susp);
+      let tag = el.querySelector('.susp-tag');
+      if (susp && !tag) { tag = document.createElement('span'); tag.className = 'susp-tag'; el.appendChild(tag); }
+      if (susp && tag) {
+        const until = src.until ? src.until() : 0;
+        tag.dataset.suspUntil = String(until);
+        tag.textContent = `Paused \u00b7 ${Math.max(1, Math.ceil((until - Date.now()) / 1000))}s`;
+      }
+      if (!susp && tag) tag.remove();
     });
     patchSlipLive();
   }
@@ -220,8 +277,12 @@
         if (note) note.remove();
         tag = document.createElement('span');
         tag.className = 'mk-susp';
-        tag.textContent = 'Suspended';
         head.appendChild(tag);
+      }
+      if (any) {
+        const until = Math.min(...g.sels.map((x) => x._suspUntil || Infinity));
+        tag.dataset.suspUntil = String(until);
+        tag.textContent = `Paused \u00b7 ${Math.max(1, Math.ceil((until - Date.now()) / 1000))}s`;
       } else if (!any && tag) {
         tag.remove();
         const n = document.createElement('span');
@@ -418,9 +479,13 @@
     const btn = $('[data-place]');
     if (btn) { btn.disabled = true; btn.innerHTML = `<span class="spin"></span> Memproses…`; }
     const snapshot = state.slip.map((s) => ({ ...s }));
+    const forced = LAB.nextBet;
+    if (forced !== 'auto') { LAB.nextBet = 'auto'; syncLabUI(); }
     setTimeout(() => {
-      if (Math.random() < 0.12) {
-        const reason = Math.random() > 0.5 ? 'Market closed while the bet was processing.' : 'Odds moved before the bet was accepted.';
+      if (forced === 'fail' || (forced === 'auto' && Math.random() < 0.12)) {
+        const reason = forced === 'fail'
+          ? 'State lab: market closed while the bet was processing.'
+          : (Math.random() > 0.5 ? 'Market closed while the bet was processing.' : 'Odds moved before the bet was accepted.');
         state.lastError = reason;
         save(); refreshSlipSurfaces();
         toast('Bet failed', reason + ' No funds were deducted.', 'err');
@@ -499,7 +564,10 @@
 
   function warnHTML(it, susp, changed) {
     if (susp) {
-      return `<div class="si-warn danger"><span class="grow">Selection suspended. Wait for the market to reopen.</span>
+      const s = oddsIndex.get(it.key);
+      const until = s && s.until ? s.until() : 0;
+      const rem = Math.max(1, Math.ceil((until - Date.now()) / 1000));
+      return `<div class="si-warn danger"><span class="grow">Selection suspended. Reopens in ${rem}s.</span>
         <div class="acts"><button class="mini-btn" data-act="remove-sel" data-key="${esc(it.key)}">Remove</button></div></div>`;
     }
     if (changed) {
@@ -591,8 +659,11 @@
           const k = box.querySelector('.k'); if (k) k.textContent = changed ? 'New odds' : 'Odds';
         }
         const warn = root.querySelector('.warn-slot');
-        if (warn && warn.dataset.state !== `${susp}|${changed}`) {
-          warn.dataset.state = `${susp}|${changed}`;
+        const src = oddsIndex.get(it.key);
+        const rem = susp && src && src.until ? Math.max(1, Math.ceil((src.until() - Date.now()) / 1000)) : 0;
+        const stateKey = `${susp}|${changed}|${rem}`;
+        if (warn && warn.dataset.state !== stateKey) {
+          warn.dataset.state = stateKey;
           warn.innerHTML = warnHTML(it, susp, changed);
         }
       });
@@ -624,15 +695,19 @@
   function oddBtn(matchId, sel, opts = {}) {
     const key = `${matchId}:${sel.id}`;
     const pressed = Boolean(slipItem(key));
-    const susp = (sel._suspUntil || 0) > Date.now();
+    const suspUntil = sel._suspUntil || 0;
+    const susp = suspUntil > Date.now();
+    const suspLabel = `Paused \u00b7 ${Math.max(1, Math.ceil((suspUntil - Date.now()) / 1000))}s`;
     const label = opts.label != null ? opts.label : sel.label;
     const aria = `${sel.label}, odds ${oddsFmt(sel.odds)}${susp ? ', suspended' : ''}`;
+    const src = oddsIndex.get(key);
     return `<button class="odd ${susp ? 'susp' : ''}" data-act="odds" data-oddkey="${esc(key)}" data-match="${esc(matchId)}" data-sel="${esc(sel.id)}"
       aria-pressed="${pressed}" aria-label="${esc(aria)}"${susp ? ' aria-disabled="true"' : ''} data-last="${oddsFmt(sel.odds)}">
       <span class="odd-k">${esc(label)}</span>
       <span class="odd-v">${oddsFmt(sel.odds)}</span>
+      ${src ? sparkMarkup(src) : ''}
       <span class="delta" aria-hidden="true"></span>
-      ${susp ? '<span class="susp-tag">Suspended</span>' : ''}
+      ${susp ? `<span class="susp-tag" data-susp-until="${suspUntil}">${suspLabel}</span>` : ''}
     </button>`;
   }
 
@@ -1393,8 +1468,65 @@
     if (e.key === 'Enter') { e.preventDefault(); palGo(items[palActive]); }
   }
 
+
+  /* ------------------------------ state lab ---------------------------- */
+  function syncLabUI() {
+    $$('[data-lab-odds]').forEach((b) => {
+      b.classList.toggle('active', (b.dataset.labOdds === 'paused') === LAB.oddsPaused);
+    });
+    $$('[data-lab-bet]').forEach((b) => {
+      b.classList.toggle('active', b.dataset.labBet === LAB.nextBet);
+    });
+  }
+
+  function toggleLab(open) {
+    const panel = $('#labPanel');
+    const btn = $('#labTrigger');
+    if (!panel || !btn) return;
+    const show = open === undefined ? panel.hidden : open;
+    panel.hidden = !show;
+    btn.classList.toggle('on', show);
+    btn.setAttribute('aria-expanded', String(show));
+    if (show) syncLabUI();
+  }
+
+  function labSuspend(marketId, groupName) {
+    const m = matchById('ars-bha');
+    if (!m) return;
+    (m.markets || []).forEach((mk) => mk.groups.forEach((g) => g.sels.forEach((sel) => { sel._suspUntil = 0; })));
+    m._suspTarget = null;
+    const mk = m.markets.find((x) => x.id === marketId);
+    const g = mk && mk.groups.find((x) => x.name === groupName);
+    if (!g) return;
+    g.sels.forEach((sel) => { sel._suspUntil = Date.now() + 10000; });
+    patchOddsDom();
+    patchMarketHeads(m);
+    toast('State lab · market paused', `${groupName} closed for 10 seconds. Reopens automatically.`, 'warn');
+  }
+
+  function suspTick() {
+    const now = Date.now();
+    let active = false, expired = false;
+    $$('[data-susp-until]').forEach((el) => {
+      const until = Number(el.dataset.suspUntil) || 0;
+      if (!until) return;
+      const rem = Math.ceil((until - now) / 1000);
+      if (rem <= 0) { expired = true; el.removeAttribute('data-susp-until'); return; }
+      active = true;
+      el.textContent = `Paused \u00b7 ${rem}s`;
+    });
+    if (expired) {
+      patchOddsDom();
+      const m = matchById('ars-bha');
+      if (m) patchMarketHeads(m);
+    }
+    if (active || expired) patchSlipLive();
+  }
+
   /* ------------------------------- events ------------------------------ */
   document.addEventListener('click', (e) => {
+    const labPanel = $('#labPanel');
+    if (labPanel && !labPanel.hidden && !e.target.closest('#labPanel') && !e.target.closest('#labTrigger')) toggleLab(false);
     const palItem = e.target.closest('.pal-item');
     if (palItem) { palGo(palFiltered[Number(palItem.dataset.i)]); return; }
     if (e.target === $('#palette')) { closePalette(); return; }
@@ -1402,6 +1534,36 @@
     if (e.target.closest('#alertsBtn')) { toast('No new notifications', 'Markets you follow will show up here.', 'info'); return; }
     if (e.target.closest('#userBtn') || e.target.closest('#balanceChip')) {
       toast('Demo account', `Play balance ${money(state.balance)} USDT. No real deposits or withdrawals.`, 'info'); return;
+    }
+
+    if (e.target.closest('#labTrigger')) { toggleLab(); return; }
+    if (e.target.closest('#labClose')) { toggleLab(false); return; }
+    const labBtn = e.target.closest('[data-lab-odds],[data-lab-bet],[data-lab-nudge],[data-lab-suspend],[data-lab-reset]');
+    if (labBtn) {
+      if (labBtn.dataset.labOdds) {
+        LAB.oddsPaused = labBtn.dataset.labOdds === 'paused';
+        syncLabUI();
+        toast(LAB.oddsPaused ? 'State lab · odds paused' : 'State lab · odds live',
+          LAB.oddsPaused ? 'Prices are frozen so you can inspect a market.' : 'Automatic price ticks resumed.', 'info');
+      } else if (labBtn.dataset.labBet) {
+        LAB.nextBet = labBtn.dataset.labBet;
+        syncLabUI();
+        toast('State lab · next bet', ({ auto: 'Random outcome (about 12% fail).', ok: 'The next bet will succeed.', fail: 'The next bet will fail, no stake taken.' })[LAB.nextBet], 'info');
+        toggleLab(false);
+      } else if (labBtn.hasAttribute('data-lab-nudge')) {
+        driftOdds(true);
+        toast('State lab · prices nudged', 'A synthetic tick was applied to live markets.', 'info');
+        toggleLab(false);
+      } else if (labBtn.dataset.labSuspend) {
+        const [marketId, groupName] = labBtn.dataset.labSuspend.split('|');
+        labSuspend(marketId, groupName);
+        toggleLab(false);
+      } else if (e.target.closest('[data-lab-reset]')) {
+        localStorage.removeItem(KEY);
+        location.hash = '#/';
+        location.reload();
+      }
+      return;
     }
 
     const el = e.target.closest('[data-act]');
@@ -1511,6 +1673,7 @@
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openPalette(); return; }
     if ($('#palette').hidden === false) { palKey(e); return; }
     if (e.key === 'Escape') {
+      if (!$('#labPanel').hidden) { toggleLab(false); return; }
       if (drawer.classList.contains('open')) { closeDrawer(); return; }
     }
     if (e.key === '/' && !/input|textarea/i.test((document.activeElement || {}).tagName || '')) {
@@ -1527,7 +1690,9 @@
 
   /* ------------------------------- timer ------------------------------- */
   buildPaletteIndex();
+  syncLabUI();
   render();
+  setInterval(suspTick, 1000);
   setInterval(clockTick, 45000);
   setInterval(countdownTick, 1000);
   setInterval(driftOdds, 3200);

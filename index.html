@@ -41,6 +41,7 @@
   <symbol id="i-chev" viewBox="0 0 24 24"><path d="m8.5 5.5 6.5 6.5-6.5 6.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="9" r="3.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5 20c.7-3.4 3.5-5.2 7-5.2s6.3 1.8 7 5.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
   <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5 19 6v6c0 4-3 7-7 8.5C8 19 5 16 5 12V6z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="m9 12 2.2 2.2L15.5 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-lab" viewBox="0 0 24 24"><path d="M9 3h6M10 3v5.4L5.3 18a2.1 2.1 0 0 0 1.8 3.1h9.8A2.1 2.1 0 0 0 18.7 18L14 8.4V3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.6 14.4h8.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="10.4" cy="17.4" r=".9" fill="currentColor"/><circle cx="13.8" cy="18.2" r=".6" fill="currentColor"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
   <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
 </svg>
@@ -128,6 +129,52 @@
     </div>
   </div>
 </div>
+
+
+<button class="lab-trigger" id="labTrigger" aria-expanded="false" aria-controls="labPanel">
+  <svg width="14" height="14" aria-hidden="true"><use href="#i-lab"/></svg><span>Lab</span>
+</button>
+
+<section class="lab-panel" id="labPanel" hidden aria-label="Prototype state lab">
+  <div class="lab-head">
+    <div><h2>State lab</h2><p>Demo controls for judges</p></div>
+    <button class="lab-x" id="labClose" aria-label="Close state lab"><svg width="14" height="14"><use href="#i-x"/></svg></button>
+  </div>
+
+  <div class="lab-block">
+    <div class="lab-label">Odds movement</div>
+    <div class="lab-seg">
+      <button data-lab-odds="live">Live</button>
+      <button data-lab-odds="paused">Paused</button>
+    </div>
+    <button class="lab-btn lab-nudge" data-lab-nudge>Nudge prices now</button>
+  </div>
+
+  <div class="lab-block">
+    <div class="lab-label">Pause a market &middot; 10s</div>
+    <div class="lab-grid">
+      <button class="lab-btn" data-lab-suspend="popular|Total goals">Total goals</button>
+      <button class="lab-btn" data-lab-suspend="popular|Both teams to score">BTTS</button>
+      <button class="lab-btn" data-lab-suspend="corners|Total cards">Cards</button>
+      <button class="lab-btn" data-lab-suspend="corners|Total corners">Corners</button>
+    </div>
+  </div>
+
+  <div class="lab-block">
+    <div class="lab-label">Next bet</div>
+    <div class="lab-seg">
+      <button data-lab-bet="auto">Auto</button>
+      <button data-lab-bet="ok">Success</button>
+      <button data-lab-bet="fail">Failure</button>
+    </div>
+  </div>
+
+  <div class="lab-block lab-rowline">
+    <span>Session state</span>
+    <button class="lab-btn danger" data-lab-reset>Reset demo</button>
+  </div>
+  <p class="lab-note">Session only. Triggers odds ticks, market pauses and the bet-failure path on demand &mdash; every required state, verifiable in seconds.</p>
+</section>
 
 <div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
 

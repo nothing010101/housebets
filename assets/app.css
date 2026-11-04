@@ -218,7 +218,7 @@ kbd{
   font-size:10.5px;color:var(--coral);font-variant-numeric:tabular-nums;
 }
 .rail-sport .live-cnt::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--coral)}
-.rail-foot{margin-top:auto;padding:20px 6px 0}
+.rail-foot{margin-top:auto;padding:20px 6px 58px}
 .rail-note{
   display:flex;gap:8px;align-items:flex-start;padding:11px 10px;
   border:1px dashed var(--line-2);border-radius:9px;
@@ -320,7 +320,8 @@ kbd{
   font-size:11px;color:var(--faint);letter-spacing:-.003em;
 }
 .sb-foot .odds{width:auto;grid-template-columns:repeat(3,1fr);flex:1;max-width:212px;gap:5px}
-.sb-foot .odd{height:32px;padding:0 8px}
+.sb-foot .odd{height:34px;padding:0 8px}
+.sb-foot .spark{display:none}
 .sb-foot .odd-k{font-size:9px}
 .sb-foot .odd-v{font-size:13px}
 
@@ -446,15 +447,17 @@ kbd{
 .odd.flash-up .delta,.odd.flash-down .delta{opacity:1}
 .odd.flash-up .delta{color:var(--aqua)}
 .odd.flash-down .delta{color:var(--coral)}
-.odd.susp{pointer-events:none;opacity:.55;filter:grayscale(.4)}
-.odd.susp::before{
-  content:"";position:absolute;inset:0;
-  background:repeating-linear-gradient(135deg,transparent 0 5px,rgba(255,255,255,.045) 5px 6px);
-}
+.odd.susp{pointer-events:none;opacity:1}
+.odd.susp .odd-k,.odd.susp .odd-v,.odd.susp .spark,.odd.susp .delta{opacity:.10}
+.odd.susp::before{display:none}
 .susp-tag{
   position:absolute;inset:0;display:grid;place-items:center;
-  font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--amber);
-  background:rgba(6,17,21,.55);border-radius:8px;
+  font-size:9px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:var(--amber);
+  border-radius:8px;
+  background:
+    repeating-linear-gradient(135deg,rgba(242,180,92,.12) 0 5px,rgba(242,180,92,.02) 5px 10px),
+    rgba(6,17,21,.82);
+  box-shadow:inset 0 0 0 1px rgba(242,180,92,.28);
 }
 
 /* follow button */
@@ -594,11 +597,7 @@ kbd{
     linear-gradient(180deg,#081C24,#061319);
   padding:22px 24px 18px;margin-bottom:20px;
 }
-.scoreboard::before{
-  content:"";position:absolute;inset:0;
-  background-image:linear-gradient(90deg,transparent 49.6%,rgba(163,214,219,.08) 49.6%,rgba(163,214,219,.08) 50.4%,transparent 50.4%);
-  pointer-events:none;
-}
+.scoreboard::before{display:none}
 .sb-crumb{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--mute)}
 .sb-main{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:18px}
 .sb-side{display:flex;align-items:center;gap:12px;min-width:0}
@@ -1171,4 +1170,68 @@ kbd{
 @media(max-width:1120px){
   .rail-reset{justify-content:center;padding:0}
   .rail-reset-label{display:none}
+}
+
+/* ============================ ODDS HEARTBEAT ============================ */
+.odd{height:44px;padding-bottom:8px}
+.spark{
+  position:absolute;left:7px;right:7px;bottom:3px;height:7px;width:auto;
+  opacity:.5;color:var(--aqua);pointer-events:none;overflow:visible;
+}
+.spark polyline{fill:none;stroke:currentColor;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.spark.trend-down{color:var(--coral)}
+.odd[aria-pressed="true"] .spark{opacity:.9}
+.odd.susp .spark{opacity:.15}
+.odd:hover .spark{opacity:.8}
+.susp-tag{letter-spacing:.06em;font-variant-numeric:tabular-nums;font-size:8.5px}
+.mk-body .odd{height:46px}
+@media (max-width:900px){.odd{height:46px}}
+
+/* ============================ STATE LAB ============================ */
+.lab-trigger{
+  position:fixed;left:20px;bottom:20px;z-index:74;
+  display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 11px 0 9px;
+  border:1px solid var(--line-2);border-radius:9px;
+  background:rgba(9,26,33,.94);backdrop-filter:blur(12px);
+  font-size:9.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);
+  transition:.18s var(--ease);
+}
+.lab-trigger:hover{border-color:var(--line-3);color:var(--txt-2)}
+.lab-trigger.on{color:var(--aqua);border-color:var(--aqua-line);background:rgba(75,227,200,.1)}
+.lab-trigger svg{color:inherit}
+.lab-panel{
+  position:fixed;left:20px;bottom:60px;z-index:75;width:318px;max-height:min(72vh,560px);overflow:auto;
+  padding:14px;border-radius:14px;border:1px solid var(--line-2);
+  background:linear-gradient(180deg,#0B2028,#061319);
+  box-shadow:0 34px 80px -34px rgba(0,0,0,.96),inset 0 1px 0 rgba(255,255,255,.05);
+  animation:labIn .26s var(--spring);
+}
+.lab-panel[hidden]{display:none}
+@keyframes labIn{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:none}}
+.lab-head{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px}
+.lab-head h2{font-size:12.5px;font-weight:600;letter-spacing:-.01em}
+.lab-head p{font-size:10px;color:var(--faint);margin-top:2px}
+.lab-x{margin-left:auto;width:22px;height:22px;display:grid;place-items:center;border-radius:5px;color:var(--faint)}
+.lab-x:hover{background:rgba(255,255,255,.06);color:var(--txt)}
+.lab-block{padding:10px 0;border-top:1px solid var(--line)}
+.lab-label{font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:7px}
+.lab-seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;padding:3px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.02)}
+.lab-seg button{height:26px;border-radius:5px;font-size:10.5px;color:var(--mute);transition:.15s}
+.lab-seg button:hover{color:var(--txt-2)}
+.lab-seg button.active{background:rgba(75,227,200,.14);color:var(--aqua);box-shadow:inset 0 0 0 1px rgba(75,227,200,.2)}
+.lab-btn{
+  height:29px;padding:0 9px;border:1px solid var(--line-2);border-radius:6px;
+  font-size:10.5px;color:var(--txt-2);background:rgba(255,255,255,.025);transition:.16s var(--ease);
+}
+.lab-btn:hover{border-color:var(--line-3);color:var(--txt);background:rgba(255,255,255,.05)}
+.lab-btn.danger{color:var(--coral);border-color:rgba(255,122,99,.32)}
+.lab-btn.danger:hover{background:rgba(255,122,99,.1)}
+.lab-nudge{width:100%;margin-top:6px}
+.lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.lab-rowline{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lab-rowline > span{font-size:10.5px;color:var(--mute)}
+.lab-note{font-size:9.5px;line-height:1.45;color:var(--faint);margin-top:4px}
+@media (max-width:900px){
+  .lab-trigger{left:12px;bottom:calc(128px + env(safe-area-inset-bottom));height:30px;font-size:9px}
+  .lab-panel{left:12px;right:12px;width:auto;bottom:calc(164px + env(safe-area-inset-bottom));max-height:58vh}
 }

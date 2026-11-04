@@ -1,26 +1,26 @@
 /* Housebets Sportsbook — sample data only. No real players, no real money. */
 (function () {
   const SPORTS = [
-    { id: 'football', name: 'Sepak bola', icon: 'ball', live: 9 },
-    { id: 'basketball', name: 'Basket', icon: 'basket', live: 2 },
-    { id: 'tennis', name: 'Tenis', icon: 'tennis', live: 1 },
+    { id: 'football', name: 'Football', icon: 'ball', live: 9 },
+    { id: 'basketball', name: 'Basketball', icon: 'basket', live: 2 },
+    { id: 'tennis', name: 'Tennis', icon: 'tennis', live: 1 },
     { id: 'esports', name: 'Esports', icon: 'pad', live: 1 },
     { id: 'mma', name: 'MMA', icon: 'glove', live: 0 },
-    { id: 'cricket', name: 'Kriket', icon: 'bat', live: 0 },
+    { id: 'cricket', name: 'Cricket', icon: 'bat', live: 0 },
   ];
 
   const COMPS = {
-    pl:   { id: 'pl',   sport: 'football', name: 'Premier League', country: 'Inggris', mark: 'PL',  tint: 210 },
-    ucl:  { id: 'ucl',  sport: 'football', name: 'Champions League', country: 'Eropa', mark: 'UCL', tint: 245 },
-    lal:  { id: 'lal',  sport: 'football', name: 'LaLiga', country: 'Spanyol', mark: 'LL', tint: 28 },
-    sa:   { id: 'sa',   sport: 'football', name: 'Serie A', country: 'Italia', mark: 'SA', tint: 160 },
-    bun:  { id: 'bun',  sport: 'football', name: 'Bundesliga', country: 'Jerman', mark: 'BL', tint: 0 },
-    nba:  { id: 'nba',  sport: 'basketball', name: 'NBA', country: 'Amerika Serikat', mark: 'NBA', tint: 12 },
+    pl:   { id: 'pl',   sport: 'football', name: 'Premier League', country: 'England', mark: 'PL',  tint: 210 },
+    ucl:  { id: 'ucl',  sport: 'football', name: 'Champions League', country: 'Europe', mark: 'UCL', tint: 245 },
+    lal:  { id: 'lal',  sport: 'football', name: 'LaLiga', country: 'Spain', mark: 'LL', tint: 28 },
+    sa:   { id: 'sa',   sport: 'football', name: 'Serie A', country: 'Italy', mark: 'SA', tint: 160 },
+    bun:  { id: 'bun',  sport: 'football', name: 'Bundesliga', country: 'Germany', mark: 'BL', tint: 0 },
+    nba:  { id: 'nba',  sport: 'basketball', name: 'NBA', country: 'United States', mark: 'NBA', tint: 12 },
     atp:  { id: 'atp',  sport: 'tennis', name: 'ATP Finals', country: 'Turin', mark: 'ATP', tint: 185 },
     cs2:  { id: 'cs2',  sport: 'esports', name: 'CS2 Major', country: 'Shanghai', mark: 'CS2', tint: 45 },
   };
 
-  // hue: dipakai untuk monogram crest
+  // hue: used for the monogram crest
   const TEAMS = {
     ars: { name: 'Arsenal', short: 'ARS', hue: 6, comp: 'pl' },
     bha: { name: 'Brighton', short: 'BHA', hue: 202, comp: 'pl' },
@@ -72,7 +72,7 @@
 
     lal_t: { name: 'LA Lakers', short: 'LAL', hue: 320, comp: 'nba' },
     bos: { name: 'Boston Celtics', short: 'BOS', hue: 150, comp: 'nba' },
-    gsw: { name: 'Golden State', short: 'GSW', hue: 214, comp: 'nba' },
+    gsw: { name: 'Goalsden State', short: 'GSW', hue: 214, comp: 'nba' },
     den: { name: 'Denver Nuggets', short: 'DEN', hue: 220, comp: 'nba' },
 
     alc: { name: 'Alcaraz', short: 'ALC', hue: 25, comp: 'atp' },
@@ -92,56 +92,56 @@
   // markets for the featured match, built once
   const ARS_MARKETS = [
     {
-      id: 'popular', name: 'Populer',
+      id: 'popular', name: 'Popular',
       groups: [
-        { name: 'Hasil pertandingan', note: '90 menit', sels: [
+        { name: 'Match result', note: '90 mins', sels: [
           { id: 'h', label: 'Arsenal', odds: 1.74 },
-          { id: 'd', label: 'Seri', odds: 3.95 },
+          { id: 'd', label: 'Draw', odds: 3.95 },
           { id: 'a', label: 'Brighton', odds: 4.55 },
         ]},
-        { name: 'Total gol', note: 'Garis 2.5', sels: [
-          { id: 'o25', label: 'Lebih dari 2.5', odds: 1.62 },
-          { id: 'u25', label: 'Kurang dari 2.5', odds: 2.28 },
+        { name: 'Total goals', note: 'Line 2.5', sels: [
+          { id: 'o25', label: 'Over 2.5', odds: 1.62 },
+          { id: 'u25', label: 'Under 2.5', odds: 2.28 },
         ]},
-        { name: 'Kedua tim mencetak gol', sels: [
-          { id: 'btts-y', label: 'Ya', odds: 1.48 },
-          { id: 'btts-n', label: 'Tidak', odds: 2.52 },
+        { name: 'Both teams to score', sels: [
+          { id: 'btts-y', label: 'Yes', odds: 1.48 },
+          { id: 'btts-n', label: 'No', odds: 2.52 },
         ]},
       ],
     },
     {
-      id: 'goals', name: 'Gol',
+      id: 'goals', name: 'Goals',
       groups: [
-        { name: 'Total gol', note: 'O/U', sels: [
-          { id: 'g15o', label: 'Lebih 1.5', odds: 1.18 },
-          { id: 'g15u', label: 'Kurang 1.5', odds: 4.60 },
-          { id: 'g35o', label: 'Lebih 3.5', odds: 2.70 },
-          { id: 'g35u', label: 'Kurang 3.5', odds: 1.44 },
+        { name: 'Total goals', note: 'O/U', sels: [
+          { id: 'g15o', label: 'Over 1.5', odds: 1.18 },
+          { id: 'g15u', label: 'Under 1.5', odds: 4.60 },
+          { id: 'g35o', label: 'Over 3.5', odds: 2.70 },
+          { id: 'g35u', label: 'Under 3.5', odds: 1.44 },
         ]},
-        { name: 'Gol di babak 2', sels: [
-          { id: 'h2g-y', label: 'Ya', odds: 1.34 },
-          { id: 'h2g-n', label: 'Tidak', odds: 3.05 },
+        { name: 'Goals in 2nd half', sels: [
+          { id: 'h2g-y', label: 'Yes', odds: 1.34 },
+          { id: 'h2g-n', label: 'No', odds: 3.05 },
         ]},
-        { name: 'Tim mencetak gol berikutnya', sels: [
+        { name: 'Next team to score', sels: [
           { id: 'nxt-h', label: 'Arsenal', odds: 1.66 },
           { id: 'nxt-a', label: 'Brighton', odds: 2.62 },
-          { id: 'nxt-none', label: 'Tidak ada', odds: 9.5 },
+          { id: 'nxt-none', label: 'No goal', odds: 9.5 },
         ]},
       ],
     },
     {
-      id: 'halves', name: 'Babak',
+      id: 'halves', name: 'Halves',
       groups: [
-        { name: 'Hasil babak 2', sels: [
+        { name: '2nd-half result', sels: [
           { id: 'h2-h', label: 'Arsenal', odds: 2.05 },
-          { id: 'h2-d', label: 'Seri', odds: 2.42 },
+          { id: 'h2-d', label: 'Draw', odds: 2.42 },
           { id: 'h2-a', label: 'Brighton', odds: 4.10 },
         ]},
-        { name: 'Total gol babak 2', note: 'Garis 1.5', sels: [
-          { id: 'h2o', label: 'Lebih 1.5', odds: 2.16 },
-          { id: 'h2u', label: 'Kurang 1.5', odds: 1.66 },
+        { name: '2nd-half goals', note: 'Line 1.5', sels: [
+          { id: 'h2o', label: 'Over 1.5', odds: 2.16 },
+          { id: 'h2u', label: 'Under 1.5', odds: 1.66 },
         ]},
-        { name: 'Skor tepat', sels: [
+        { name: 'Correct score', sels: [
           { id: 'cs-21', label: '2 – 1', odds: 6.8 },
           { id: 'cs-31', label: '3 – 1', odds: 10.5 },
           { id: 'cs-22', label: '2 – 2', odds: 12.0 },
@@ -150,23 +150,23 @@
       ],
     },
     {
-      id: 'handicap', name: 'Handicap',
+      id: 'handicap', name: 'Handicaps',
       groups: [
-        { name: 'Handicap Asia', note: 'Arsenal −0.5', sels: [
+        { name: 'Asian handicap', note: 'Arsenal −0.5', sels: [
           { id: 'ah-h', label: 'Arsenal −0.5', odds: 1.68 },
           { id: 'ah-a', label: 'Brighton +0.5', odds: 2.20 },
         ]},
-        { name: 'Handicap Eropa', note: 'Arsenal −1', sels: [
+        { name: 'European handicap', note: 'Arsenal −1', sels: [
           { id: 'eh-h', label: 'Arsenal −1', odds: 2.42 },
-          { id: 'eh-d', label: 'Seri (−1)', odds: 3.70 },
+          { id: 'eh-d', label: 'Draw (−1)', odds: 3.70 },
           { id: 'eh-a', label: 'Brighton +1', odds: 2.62 },
         ]},
       ],
     },
     {
-      id: 'scorers', name: 'Pencetak gol',
+      id: 'scorers', name: 'Goalscorers',
       groups: [
-        { name: 'Pencetak gol kapan saja', sels: [
+        { name: 'Anytime goalscorer', sels: [
           { id: 's-saka', label: 'B. Saka', odds: 2.45 },
           { id: 's-havertz', label: 'K. Havertz', odds: 2.80 },
           { id: 's-jesus', label: 'G. Jesus', odds: 3.10 },
@@ -174,7 +174,7 @@
           { id: 's-mitoma', label: 'K. Mitoma', odds: 4.20 },
           { id: 's-pedro', label: 'João Pedro', odds: 4.60 },
         ]},
-        { name: 'Pencetak gol pertama', sels: [
+        { name: 'First goalscorer', sels: [
           { id: 'f-saka', label: 'B. Saka', odds: 5.50 },
           { id: 'f-havertz', label: 'K. Havertz', odds: 6.20 },
           { id: 'f-welbeck', label: 'D. Welbeck', odds: 8.00 },
@@ -182,26 +182,26 @@
       ],
     },
     {
-      id: 'corners', name: 'Sudut & kartu',
+      id: 'corners', name: 'Corners & cards',
       groups: [
-        { name: 'Total tendangan sudut', note: 'Garis 9.5', sels: [
-          { id: 'c-o', label: 'Lebih 9.5', odds: 2.02 },
-          { id: 'c-u', label: 'Kurang 9.5', odds: 1.74 },
+        { name: 'Total corners', note: 'Line 9.5', sels: [
+          { id: 'c-o', label: 'Over 9.5', odds: 2.02 },
+          { id: 'c-u', label: 'Under 9.5', odds: 1.74 },
         ]},
-        { name: 'Total kartu', note: 'Garis 4.5', sels: [
-          { id: 'k-o', label: 'Lebih 4.5', odds: 2.55 },
-          { id: 'k-u', label: 'Kurang 4.5', odds: 1.46 },
+        { name: 'Total cards', note: 'Line 4.5', sels: [
+          { id: 'k-o', label: 'Over 4.5', odds: 2.55 },
+          { id: 'k-u', label: 'Under 4.5', odds: 1.46 },
         ]},
-        { name: 'Kartu untuk Brighton', sels: [
-          { id: 'k-bha', label: '2+ kartu', odds: 2.34 },
-          { id: 'k-ars', label: 'Arsenal 2+ kartu', odds: 2.72 },
+        { name: 'Brighton cards', sels: [
+          { id: 'k-bha', label: '2+ cards', odds: 2.34 },
+          { id: 'k-ars', label: 'Arsenal 2+ cards', odds: 2.72 },
         ]},
       ],
     },
   ];
 
   const MATCHES = [
-    { id: 'ars-bha', sport: 'football', comp: 'pl', home: 'ars', away: 'bha', status: 'live', minute: 67, score: [2, 1], kickoff: mins(-67), featured: true, venue: 'Emirates Stadium', round: 'Pekan 14', markets: ARS_MARKETS,
+    { id: 'ars-bha', sport: 'football', comp: 'pl', home: 'ars', away: 'bha', status: 'live', minute: 67, score: [2, 1], kickoff: mins(-67), featured: true, venue: 'Emirates Stadium', round: 'Matchweek 14', markets: ARS_MARKETS,
       odds: { h: 1.74, d: 3.95, a: 4.55 } },
     { id: 'mci-che', sport: 'football', comp: 'pl', home: 'mci', away: 'che', status: 'live', minute: 54, score: [1, 1], kickoff: mins(-54), odds: { h: 1.92, d: 3.60, a: 3.85 } },
     { id: 'liv-mun', sport: 'football', comp: 'pl', home: 'liv', away: 'mun', status: 'live', minute: 78, score: [3, 0], kickoff: mins(-78), odds: { h: 1.12, d: 8.5, a: 19.0 } },
@@ -233,17 +233,17 @@
     { id: 'alc-sin', sport: 'tennis', comp: 'atp', home: 'alc', away: 'sin', status: 'live', minute: 0, score: [1, 1], clockLabel: 'Set 3 · 3–2', odds: { h: 1.85, a: 1.95 } },
     { id: 'djo-zve', sport: 'tennis', comp: 'atp', home: 'djo', away: 'zve', status: 'upcoming', kickoff: mins(58), odds: { h: 1.70, a: 2.12 } },
 
-    { id: 'vit-nav', sport: 'esports', comp: 'cs2', home: 'vit', away: 'nav', status: 'live', minute: 0, score: [1, 0], clockLabel: 'Peta 2 · 9–7', odds: { h: 1.55, a: 2.40 } },
+    { id: 'vit-nav', sport: 'esports', comp: 'cs2', home: 'vit', away: 'nav', status: 'live', minute: 0, score: [1, 0], clockLabel: 'Map 2 · 9–7', odds: { h: 1.55, a: 2.40 } },
     { id: 'faze-g2', sport: 'esports', comp: 'cs2', home: 'faze', away: 'g2', status: 'upcoming', kickoff: mins(35), odds: { h: 2.05, a: 1.78 } },
   ];
 
-  // riwayat taruhan contoh (My bets)
+  // sample bet history (My bets)
   const SEED_BETS = [
-    { id: 'b-1', status: 'open', matchId: 'mci-che', market: 'Hasil pertandingan', selection: 'Man City', odds: 1.92, stake: 25, placed: NOW - 22 * 60000, cashoutBase: 42.5 },
-    { id: 'b-2', status: 'open', matchId: 'rma-bar', market: 'Total gol 2.5', selection: 'Lebih dari 2.5', odds: 1.72, stake: 40, placed: NOW - 51 * 60000, cashoutBase: 55.2 },
-    { id: 'b-3', status: 'won', matchId: 'int-juv', market: 'Hasil pertandingan', selection: 'Inter', odds: 1.8, stake: 30, placed: NOW - 5 * 3600000, payout: 54, score: '2 – 0' },
-    { id: 'b-4', status: 'lost', matchId: 'bay-bvb', market: 'Kedua tim mencetak gol', selection: 'Ya', odds: 1.65, stake: 20, placed: NOW - 8 * 3600000, payout: 0, score: '1 – 0' },
-    { id: 'b-5', status: 'cashed', matchId: 'psg-ben', market: 'Hasil pertandingan', selection: 'PSG', odds: 2.4, stake: 15, placed: NOW - 26 * 3600000, payout: 21.4, score: '1 – 2' },
+    { id: 'b-1', status: 'open', matchId: 'mci-che', market: 'Match result', selection: 'Man City', odds: 1.92, stake: 25, placed: NOW - 22 * 60000, cashoutBase: 42.5 },
+    { id: 'b-2', status: 'open', matchId: 'rma-bar', market: 'Total goals 2.5', selection: 'Over 2.5', odds: 1.72, stake: 40, placed: NOW - 51 * 60000, cashoutBase: 55.2 },
+    { id: 'b-3', status: 'won', matchId: 'int-juv', market: 'Match result', selection: 'Inter', odds: 1.8, stake: 30, placed: NOW - 5 * 3600000, payout: 54, score: '2 – 0' },
+    { id: 'b-4', status: 'lost', matchId: 'bay-bvb', market: 'Both teams to score', selection: 'Yes', odds: 1.65, stake: 20, placed: NOW - 8 * 3600000, payout: 0, score: '1 – 0' },
+    { id: 'b-5', status: 'cashed', matchId: 'psg-ben', market: 'Match result', selection: 'PSG', odds: 2.4, stake: 15, placed: NOW - 26 * 3600000, payout: 21.4, score: '1 – 2' },
   ];
 
   const PLAYERS = [

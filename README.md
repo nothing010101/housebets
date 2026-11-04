@@ -1,112 +1,103 @@
-# Housebets Sportsbook — prototipe kontes
+# Housebets Sportsbook — contest prototype
 
-**Live:** https://nothing010101.github.io/housebets/ — *Pages build sedang tertahan oleh status billing akun GitHub; lihat “Deploy” di bawah.*
+**Live:** https://nothing010101.github.io/housebets/
 
-![Pratinjau sports home](preview.jpg)
+![Sports home preview](preview.jpg)
 
-Prototipe klik-able untuk kontes [Housebets · sportsbook design](https://www.housebets.com/id/contests/sportsbook-design).
-Lima halaman, satu shell, data contoh. Tanpa login, tanpa backend, tanpa uang nyata.
+Clickable prototype for the [Housebets · sportsbook design](https://www.housebets.com/id/contests/sportsbook-design) contest.
+Five pages, one shell, sample data. No login, no backend, no real money.
 
-> Catatan: paket *starter files* (shell + brand pack) tidak tersedia untuk akun ini, jadi shell, warna, dan tipografi
-> diturunkan langsung dari housebets.com — wordmark gelombang, palet marine gelap, aksen aqua sea-glass.
+> Note: the starter files (site shell + brand pack) were not available to this account, so the shell, palette and
+> typography were derived directly from housebets.com — the wave wordmark, deep marine surfaces and the sea-glass aqua accent.
 
 ---
 
-## Deploy
-
-Repo sudah berisi situs statis siap saji (tanpa build).
-
-- **Vercel / Netlify:** import repo `nothing010101/housebets`, framework *Other*, output `.`, tanpa build command.
-- **GitHub Pages:** Settings → Pages → Source: *Deploy from a branch* → `main` / root.
-  URL: https://nothing010101.github.io/housebets/ (build baru berjalan setelah masalah billing akun GitHub diselesaikan).
-
-## Jalankan
+## Run
 
 ```bash
-# cukup buka index.html, atau:
+# just open index.html, or:
 python3 -m http.server 8080
-# lalu http://localhost:8080
+# then http://localhost:8080
 ```
 
-Tidak ada build step, tidak ada dependensi, tidak ada request jaringan selain Google Fonts.
-Semua state (slip, saldo demo, taruhan, tim yang diikuti) disimpan di `localStorage`.
+No build step, no dependencies, no network requests except Google Fonts.
+All state (slip, demo balance, bets, follows) lives in `localStorage`.
 
 ---
 
-## Halaman
+## The five pages
 
-| Halaman | Rute | Isi |
+| Page | Route | What is there |
 | --- | --- | --- |
-| Sports home | `#/` | Spotlight live, Live sekarang, Segera mulai, Kompetisi populer, nav olahraga, pencarian |
-| Live | `#/live` | Semua laga berjalan, filter olahraga + kompetisi, skor & menit, empty state → Starting soon |
-| Sepak bola | `#/football` | 5 liga, odds hasil di setiap baris, ikuti tim/kompetisi, section "Untukmu" |
-| Match | `#/match/ars-bha` | Arsenal v Brighton live, scoreboard, 6 grup pasar, odds bergerak, pasar ditangguhkan |
-| Slip + My bets | `#/bets` | Taruhan tunggal, stake USDT, odds berubah, pilihan ditangguhkan, taruhan gagal, cash out |
+| Sports home | `#/` | Live spotlight, Live now, Starting soon, Top competitions, sports nav, search |
+| Live | `#/live` | Every match in play, sport + competition filters, live score & clock, empty state → Starting soon |
+| Football | `#/football` | 5 leagues, match-result odds on every row, follow a team or competition, "For you" section |
+| Match | `#/match/ars-bha` | Arsenal v Brighton live, scoreboard, 6 market groups, odds moving, markets suspended |
+| Slip + My bets | `#/bets` | Singles, USDT stakes, odds changed, selection suspended, bet placed / bet failed, cash out |
 
-Semua halaman saling terhubung lewat left nav, kartu, baris laga, breadcrumb, dan slip.
-
----
-
-## Yang benar-benar berfungsi
-
-**Pasar hidup.** Odds 1X2 di semua laga live bergerak tiap 3,2 detik dengan kilat hijau/merah dan panah delta.
-Pasar grup di halaman match ikut bergerak. Pasar "Total gol", "Total kartu", dan "BTTS" ditangguhkan bergiliran
-selama 10 detik — tombol odds berubah *striped*, klik ditolak, dan peringatan muncul di slip.
-
-**Skor & jam.** Menit pertandingan bertambah otomatis, skor bisa berubah (gol), dan laga yang belum mulai
-punya hitungan mundur yang benar-benar berjalan lalu berubah menjadi live.
-
-**Slip taruhan.**
-- Ketuk odds → masuk slip. Ketuk lagi → keluar. Bet tunggal saja, tanpa multi.
-- Stake per pilihan (input + chip 10/25/50/Maks), potensi kembali dihitung langsung.
-- Kalau odds bergeser ≥ 0,03 setelah dipilih, item menampilkan `Odds berubah 1,74 → 1,66` dan tombol
-  **Pasang** terkunci sampai pemain menekan **Terima** (atau **Batalkan**).
-- Pilihan yang ditangguhkan memblokir taruhan dengan alasan yang jelas.
-- **Pasang** memproses ±1 detik. 12% gagal (pasar ditutup / odds berubah) dengan pesan kegagalan dan tanpa potong saldo.
-- Sukses: saldo demo berkurang, slip kosong, tiket baru muncul di My bets dengan animasi.
-
-**My bets.** Tab Terbuka / Selesai, nilai cash out bergerak tiap 6 detik, konfirmasi cairkan inline,
-lalu status berubah menjadi Diuangkan dan saldo bertambah.
-
-**Pencarian** (`⌘K` / `Ctrl K` / `/`): tim, pemain, kompetisi, pasar, pertandingan — deterministik, bukan AI,
-dengan navigasi keyboard dan hasil terkelompok.
-
-**Ikuti** tim atau kompetisi → laga mereka naik ke section "Untukmu" dan filter "Diikuti" bekerja.
-
-**Responsif.** 1440px: top bar + left nav + side panel + drawer slip kanan.
-390px: bottom tab bar, slip bar di atasnya, sheet slip 90vh dengan drag handle, dan segmented control
-Slip / Taruhan saya di halaman taruhan.
+Every page is linked through the left nav, cards, fixture rows, breadcrumb and the slip.
 
 ---
 
-## Sistem desain "Tidal"
+## What actually works
 
-- **Permukaan:** marine ink `#050F14` → `#0B222A`, hairline `rgba(163,214,219,.10)`, grain 3,5% agar tidak terasa datar.
-- **Aksen:** aqua `#4BE3C8` (aksi & seleksi), coral `#FF7A63` (live), amber `#F2B45C` (ditangguhkan), sand `#E8D9C2` (aksen editorial).
-- **Tipografi:** Instrument Serif untuk headline & skor (sentuhan editorial, bukan dashboard generik),
-  Inter Tight untuk data dengan angka tabular. Label mikro uppercase + letter-spacing lebar.
-- **Bentuk:** radius 8–22px, tinggi baris laga 2 tingkat, satu garis pemisah halus, tanpa kartu bertumpuk berlebihan.
-- **Gerak:** 160–380ms dengan easing kustom, semua transisi dihapus saat `prefers-reduced-motion`.
+**Living markets.** 1X2 odds on every live match drift every 3.2 seconds with a green/red flash and a delta arrow.
+Market groups on the match page move too. "Total goals", "Total cards" and "Both teams to score" take turns
+being suspended for 10 seconds — the odds turn striped, taps are rejected and the slip shows a warning.
+
+**Scores & clocks.** Match minutes advance on their own, goals can land, and matches that have not started show a
+real countdown that ticks down and flips the fixture to live.
+
+**Bet slip.**
+- Tap odds → add to slip. Tap again → remove. Singles only, no multis.
+- Per-selection stake (input + 10/25/50/Max chips), potential return updates as you type.
+- If odds move by 0.03 or more after you pick, the item shows `Odds moved 1.74 → 1.66` and **Place bet** stays
+  locked until you press **Accept** (or **Decline**).
+- A suspended selection blocks placement with a clear reason.
+- **Place bet** processes for ~1 second. 12% of attempts fail (market closed / odds moved) with an error and no stake deducted.
+- On success the demo balance drops, the slip clears and the new ticket animates into My bets.
+
+**My bets.** Open / Settled tabs, cash-out value drifts every 6 seconds, inline cash-out confirmation,
+then the status becomes Cashed out and the balance increases.
+
+**Search** (`⌘K` / `Ctrl K` / `/`): teams, players, competitions, markets, matches — deterministic, not AI,
+with keyboard navigation and grouped results.
+
+**Follow** a team or competition → their fixtures move into the "For you" section and the "Following only" filter works.
+
+**Responsive.** 1440px: top bar + left nav + side panel + right slip drawer.
+390px: bottom tab bar, slip bar above it, 90vh slip sheet with a drag handle, and a Slip / My bets segmented control.
 
 ---
 
-## Struktur
+## "Tidal" design system
+
+- **Surfaces:** marine ink `#050F14` → `#0B222A`, hairlines `rgba(163,214,219,.10)`, 3.5% grain so it never feels flat.
+- **Accents:** aqua `#4BE3C8` (actions, selection), coral `#FF7A63` (live), amber `#F2B45C` (suspended), sand `#E8D9C2` (editorial).
+- **Type:** Instrument Serif for headlines and scores (an editorial touch, not a generic dashboard),
+  Inter Tight for data with tabular figures, wide-tracked uppercase micro labels.
+- **Form:** 8–22px radii, two-level fixture rows, one hairline, no stacked card soup.
+- **Motion:** 160–380ms with custom easing; everything is removed under `prefers-reduced-motion`.
+
+---
+
+## Structure
 
 ```
-index.html            shell: top bar, rail, side panel, bottom bar, drawer, palette, sprite ikon
-assets/app.css        design system + seluruh komponen + breakpoint 1320/1120/900/420
-assets/data.js        tim, kompetisi, 26 laga, 6 grup pasar, pemain, taruhan contoh
-assets/app.js         router hash, store localStorage, mesin odds/skor, slip, cash out, pencarian
+index.html            shell: top bar, rail, side panel, bottom bar, drawer, palette, icon sprite
+assets/app.css        design system + all components + 1320/1120/900/420 breakpoints
+assets/data.js        teams, competitions, 26 matches, 6 market groups, players, sample bets
+assets/app.js         hash router, localStorage store, odds/clock engine, slip, cash out, search
 ```
 
 ---
 
-## Cakupan kontes
+## Contest scope
 
-- [x] 5 halaman, saling terhubung, satu shell (top bar, left nav, side panel)
-- [x] 390px dan 1440px
-- [x] Slip di ponsel: bar bawah
-- [x] Front-end saja, data contoh, tanpa login, tanpa uang nyata
-- [x] Odds bergerak, pasar ditangguhkan, odds berubah harus diterima, pilihan ditangguhkan
-- [x] Taruhan berhasil & gagal, cash out, riwayat terbuka/selesai
-- [x] Tanpa multi/akumulator, boost, promo, outright, statistik, atau AI search
+- [x] 5 pages, linked, one shell (top bar, left nav, side panel)
+- [x] 390px and 1440px
+- [x] Slip on phones: a bar at the bottom
+- [x] Front end only, sample data, no login, no real money
+- [x] Odds moving, markets suspended, odds changed must be accepted, selection suspended
+- [x] Bet placed & bet failed, cash out, open/settled history
+- [x] No multis/accumulators, boosts, promos, outrights, stats widgets or AI search

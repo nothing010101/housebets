@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Housebets Sportsbook — Prototipe</title>
-<meta name="description" content="Prototipe sportsbook Housebets: sports home, live, sepak bola, halaman pertandingan, slip taruhan dan taruhan saya. Data contoh, uang demo." />
+<title>Housebets Sportsbook — Prototype</title>
+<meta name="description" content="Housebets sportsbook prototype: sports home, live, football, match page, bet slip and my bets. Sample data, demo money." />
 <meta name="theme-color" content="#050F14" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,25 +48,25 @@
 <div class="grain" aria-hidden="true"></div>
 
 <header class="topbar">
-  <a class="brand" href="#/" aria-label="Housebets Sportsbook, ke beranda">
+  <a class="brand" href="#/" aria-label="Housebets Sportsbook, go to home">
     <span class="brand-mark" aria-hidden="true"><svg width="30" height="23"><use href="#i-wave"/></svg></span>
     <span class="brand-type">housebets<span class="brand-sub">sportsbook</span></span>
   </a>
 
-  <button class="searchbtn" id="searchOpen" aria-label="Cari tim, pemain, kompetisi, atau pasar">
+  <button class="searchbtn" id="searchOpen" aria-label="Search teams, players, competitions or markets">
     <svg width="16" height="16" aria-hidden="true"><use href="#i-search"/></svg>
-    <span class="searchbtn-txt">Cari tim, pemain, kompetisi, pasar</span>
+    <span class="searchbtn-txt">Search teams, players, competitions, markets</span>
     <kbd>⌘K</kbd>
   </button>
 
   <div class="topmeta">
-    <button class="balance" id="balanceChip" aria-label="Saldo demo dalam USDT">
+    <button class="balance" id="balanceChip" aria-label="Demo balance in USDT">
       <span class="balance-dot" aria-hidden="true"></span>
       <span class="balance-val" id="balanceVal">0.00</span>
       <span class="balance-cur">USDT</span>
     </button>
     <button class="iconbtn" id="alertsBtn" aria-label="Notifikasi"><svg width="19" height="19"><use href="#i-bell"/></svg><span class="dot-badge" aria-hidden="true"></span></button>
-    <button class="avatar" id="userBtn" aria-label="Akun demo">R</button>
+    <button class="avatar" id="userBtn" aria-label="Demo account">R</button>
   </div>
 </header>
 
@@ -74,12 +74,12 @@
   <aside class="rail" id="rail" aria-label="Navigasi utama">
     <nav class="rail-main" id="railNav"></nav>
     <div class="rail-sep" role="presentation"></div>
-    <div class="rail-label">Olahraga</div>
+    <div class="rail-label">Sports</div>
     <nav class="rail-sports" id="railSports"></nav>
     <div class="rail-foot">
       <div class="rail-note">
         <svg width="15" height="15" aria-hidden="true"><use href="#i-shield"/></svg>
-        <span>Data contoh · uang demo<br>Bukan taruhan sungguhan</span>
+        <span>Sample data · demo money<br>Not real betting</span>
       </div>
     </div>
   </aside>
@@ -90,27 +90,27 @@
     <div id="panelBody"></div>
     <div class="panel-foot">
       <svg width="14" height="14" aria-hidden="true"><use href="#i-shield"/></svg>
-      <span>Prototipe kontes · tanpa login, tanpa uang nyata</span>
+      <span>Contest prototype · no login, no real money</span>
     </div>
   </aside>
 </div>
 
 <nav class="mtabs" aria-label="Navigasi bawah">
-  <a class="mtab" href="#/" data-tab="home"><svg width="21" height="21"><use href="#i-home"/></svg><span>Beranda</span></a>
+  <a class="mtab" href="#/" data-tab="home"><svg width="21" height="21"><use href="#i-home"/></svg><span>Home</span></a>
   <a class="mtab" href="#/live" data-tab="live"><svg width="21" height="21"><use href="#i-live"/></svg><span>Live</span></a>
-  <a class="mtab" href="#/football" data-tab="football"><svg width="21" height="21"><use href="#i-ball"/></svg><span>Sepak bola</span></a>
-  <a class="mtab" href="#/bets" data-tab="bets"><svg width="21" height="21"><use href="#i-ticket"/></svg><span>Taruhan</span></a>
+  <a class="mtab" href="#/football" data-tab="football"><svg width="21" height="21"><use href="#i-ball"/></svg><span>Football</span></a>
+  <a class="mtab" href="#/bets" data-tab="bets"><svg width="21" height="21"><use href="#i-ticket"/></svg><span>Bets</span></a>
 </nav>
 
 <button class="slipbar" id="slipBar" hidden>
   <span class="slipbar-count"><span id="slipBarCount">0</span></span>
-  <span class="slipbar-copy"><b>Slip taruhan</b><span id="slipBarMeta">0.00 USDT</span></span>
-  <span class="slipbar-cta">Lihat slip <svg width="16" height="16"><use href="#i-arrow-r"/></svg></span>
+  <span class="slipbar-copy"><b>Bet slip</b><span id="slipBarMeta">0.00 USDT</span></span>
+  <span class="slipbar-cta">View slip <svg width="16" height="16"><use href="#i-arrow-r"/></svg></span>
 </button>
 
 <div class="scrim" id="scrim" hidden></div>
 
-<aside class="drawer" id="drawer" aria-label="Slip taruhan" aria-hidden="true">
+<aside class="drawer" id="drawer" aria-label="Bet slip" aria-hidden="true">
   <div class="drawer-grip" aria-hidden="true"></div>
   <div id="drawerBody" class="drawer-body"></div>
 </aside>
@@ -119,12 +119,12 @@
   <div class="palette-card">
     <div class="palette-in">
       <svg width="18" height="18" aria-hidden="true"><use href="#i-search"/></svg>
-      <input id="paletteInput" type="text" placeholder="Tim, pemain, kompetisi, pasar…" autocomplete="off" spellcheck="false" />
+      <input id="paletteInput" type="text" placeholder="Teams, players, competitions, markets…" autocomplete="off" spellcheck="false" />
       <kbd>esc</kbd>
     </div>
     <div class="palette-results" id="paletteResults"></div>
     <div class="palette-foot">
-      <span><kbd>↑</kbd><kbd>↓</kbd> jelajah</span><span><kbd>↵</kbd> buka</span><span>Cari tanpa AI · data contoh</span>
+      <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> open</span><span>No AI search · sample data</span>
     </div>
   </div>
 </div>
@@ -135,8 +135,8 @@
 <script src="assets/app.js"></script>
 <noscript>
   <div style="position:fixed;inset:0;z-index:200;display:grid;place-items:center;background:#050F14;color:#EAF1F0;font-family:system-ui,sans-serif;text-align:center;padding:24px">
-    <div><h1 style="font-size:22px;margin-bottom:8px">Aktifkan JavaScript</h1>
-    <p style="font-size:13px;color:#7E969A;max-width:36ch">Prototipe ini berjalan sepenuhnya di browser. Tidak ada data yang dikirim ke mana pun.</p></div>
+    <div><h1 style="font-size:22px;margin-bottom:8px">Enable JavaScript</h1>
+    <p style="font-size:13px;color:#7E969A;max-width:36ch">This prototype runs entirely in your browser. Nothing is sent anywhere.</p></div>
   </div>
 </noscript>
 </body>

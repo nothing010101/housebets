@@ -440,7 +440,7 @@ kbd{
   100%{background:rgba(255,255,255,.028)}
 }
 .odd .delta{
-  position:absolute;top:3px;right:4px;font-size:8px;font-weight:700;
+  position:absolute;bottom:3px;right:4px;font-size:8px;font-weight:700;
   display:flex;align-items:center;gap:0;opacity:0;transition:opacity .2s;
 }
 .odd.flash-up .delta,.odd.flash-down .delta{opacity:1}
@@ -634,7 +634,8 @@ kbd{
   backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
   margin:0 -4px 18px;padding:0 4px;
 }
-.market-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.market-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:1200px){.market-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .market{
   border:1px solid var(--line);border-radius:12px;overflow:hidden;
   background:linear-gradient(180deg,rgba(255,255,255,.028),rgba(255,255,255,.008));

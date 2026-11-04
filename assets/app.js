@@ -1,6 +1,6 @@
 /* ==========================================================================
-   Housebets Sportsbook — prototipe interaktif (front-end only)
-   Semua data adalah contoh. Tidak ada pemain, uang, atau taruhan sungguhan.
+   Housebets Sportsbook — interactive prototype (front-end only)
+   All data is sample data. No real players, money, or bets.
    ========================================================================== */
 (function () {
   'use strict';
@@ -17,36 +17,36 @@
   const slipBar = $('#slipBar');
 
   /* ------------------------------- utils ------------------------------- */
-  const money = (n) => Number(n || 0).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const money = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const oddsFmt = (n) => Number(n || 0).toFixed(2);
   const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
   const ic = (name, size = 16) => `<svg width="${size}" height="${size}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   function timeHM(ts) {
-    return new Date(ts).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.');
+    return new Date(ts).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   }
   function dayLabel(ts) {
     const d = new Date(ts), n = new Date();
     const same = (a, b) => a.toDateString() === b.toDateString();
-    if (same(d, n)) return 'Hari ini';
+    if (same(d, n)) return 'Today';
     const t = new Date(n.getTime() + 864e5);
-    if (same(d, t)) return 'Besok';
-    return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+    if (same(d, t)) return 'Tomorrow';
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
   }
   function countdown(ts) {
     const s = Math.max(0, Math.floor((ts - Date.now()) / 1000));
-    if (s <= 0) return 'Mulai';
+    if (s <= 0) return 'Starting';
     if (s < 120) return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-    if (s < 3600) return `${Math.ceil(s / 60)} mnt`;
-    return `${Math.floor(s / 3600)} jam ${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}`;
+    if (s < 3600) return `${Math.ceil(s / 60)} min`;
+    return `${Math.floor(s / 3600)}h ${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}`;
   }
   function relTime(ts) {
     const s = Math.floor((Date.now() - ts) / 1000);
-    if (s < 45) return 'baru saja';
-    if (s < 3600) return `${Math.floor(s / 60)} mnt lalu`;
-    if (s < 86400) return `${Math.floor(s / 3600)} jam lalu`;
-    return `${Math.floor(s / 86400)} hr lalu`;
+    if (s < 45) return 'just now';
+    if (s < 3600) return `${Math.floor(s / 60)} min ago`;
+    if (s < 86400) return `${Math.floor(s / 3600)} h ago`;
+    return `${Math.floor(s / 86400)} d ago`;
   }
   const team = (id) => TEAMS[id] || { name: id, short: String(id).slice(0, 3).toUpperCase(), hue: 200 };
   const comp = (id) => COMPS[id] || { name: id, mark: '—', tint: 200, country: '' };
@@ -95,13 +95,13 @@
   function registerOdds() {
     MATCHES.forEach((m) => {
       // 1X2
-      const labels = { h: team(m.home).name, d: 'Seri', a: team(m.away).name };
+      const labels = { h: team(m.home).name, d: 'Draw', a: team(m.away).name };
       ['h', 'd', 'a'].forEach((p) => {
         if (!(p in m.odds)) return;
         const key = `${m.id}:${p}`;
         if (oddsIndex.has(key)) return;
         oddsIndex.set(key, {
-          matchId: m.id, selId: p, label: labels[p], marketName: 'Hasil pertandingan',
+          matchId: m.id, selId: p, label: labels[p], marketName: 'Match result',
           get: () => m.odds[p], set: (v) => { m.odds[p] = v; },
           isSusp: () => false,
         });
@@ -136,7 +136,7 @@
       if (m.status !== 'live') return;
       const live = oddsIndex.size > 0;
       if (!live) return;
-      // 1X2 — selalu bergerak, kecil
+      // 1X2 — always moving, small steps
       ['h', 'd', 'a'].forEach((p) => {
         if (!(p in m.odds)) return;
         if (m.odds[p] < 1.06) return;
@@ -146,7 +146,7 @@
         m.odds[p] = clamp(Math.round((m.odds[p] + step) * 100) / 100, 1.05, 26);
         delta.set(`${m.id}:${p}`, m.odds[p] - prev);
       });
-      // market pilihan: hanya untuk laga unggulan agar layar tidak terlalu ramai
+      // market selections: featured match only, to keep the screen calm
       if (m.featured) {
         m.markets.forEach((mk) => mk.groups.forEach((g) => g.sels.forEach((sel) => {
           if ((sel._suspUntil || 0) > Date.now()) return;
@@ -189,7 +189,7 @@
       if (susp !== el.classList.contains('susp')) {
         el.classList.toggle('susp', susp);
         let tag = el.querySelector('.susp-tag');
-        if (susp && !tag) { tag = document.createElement('span'); tag.className = 'susp-tag'; tag.textContent = 'Ditangguhkan'; el.appendChild(tag); }
+        if (susp && !tag) { tag = document.createElement('span'); tag.className = 'susp-tag'; tag.textContent = 'Suspended'; el.appendChild(tag); }
         if (!susp && tag) tag.remove();
       }
     });
@@ -200,12 +200,12 @@
     $$('[data-updated]').forEach((el) => { el.textContent = relTime(lastTick); });
   }
 
-  /* suspension cycles — pasar ditangguhkan sebentar, lalu dibuka lagi */
+  /* suspension cycles — markets close briefly, then reopen */
   let suspStep = 0;
   const SUSP_TARGETS = [
     { market: 'popular', group: 'Total gol' },
     { market: 'corners', group: 'Total kartu' },
-    { market: 'popular', group: 'Kedua tim mencetak gol' },
+    { market: 'popular', group: 'Both teams to score' },
   ];
   function patchMarketHeads(m) {
     $$('.market').forEach((el) => {
@@ -220,7 +220,7 @@
         if (note) note.remove();
         tag = document.createElement('span');
         tag.className = 'mk-susp';
-        tag.textContent = 'Ditangguhkan';
+        tag.textContent = 'Suspended';
         head.appendChild(tag);
       } else if (!any && tag) {
         tag.remove();
@@ -249,7 +249,7 @@
         g.sels.forEach((sel) => { sel._suspUntil = Date.now() + 10000; });
         m._suspTarget = target;
         if (parseRoute().name === 'match' && parseRoute().id === m.id) {
-          toast('Pasar ditangguhkan', `${g.name} ditutup sementara. Pasar dibuka lagi otomatis.`, 'warn');
+          toast('Market suspended', `${g.name} closed temporarily. It reopens automatically.`, 'warn');
         }
       }
     }
@@ -257,7 +257,7 @@
     patchMarketHeads(m);
   }
 
-  /* jam pertandingan */
+  /* match clock */
   function clockTick() {
     let dirty = false;
     MATCHES.forEach((m) => {
@@ -278,15 +278,15 @@
       }
       dirty = true;
     });
-    // laga yang mulai
+    // matches that kick off
     MATCHES.forEach((m) => {
       if (m.status === 'upcoming' && Date.now() >= m.kickoff) {
         m.status = 'live';
         m.minute = 1;
         m.score = [0, 0];
-        m.clockLabel = m.sport === 'basketball' ? 'Q1 12:00' : m.sport === 'tennis' ? 'Set 1 · 0–0' : m.sport === 'esports' ? 'Peta 1 · 0–0' : null;
+        m.clockLabel = m.sport === 'basketball' ? 'Q1 12:00' : m.sport === 'tennis' ? 'Set 1 · 0–0' : m.sport === 'esports' ? 'Map 1 · 0–0' : null;
         dirty = true;
-        toast('Pertandingan dimulai', `${team(m.home).name} v ${team(m.away).name} baru saja kick-off.`, 'info');
+        toast('Match started', `${team(m.home).name} v ${team(m.away).name} has just kicked off.`, 'info');
       }
     });
     if (!dirty) return;
@@ -294,11 +294,11 @@
     if (r.name === 'bets') { renderPanel(); return; }
     $$('[data-live-min]').forEach((el) => {
       const m = matchById(el.dataset.liveMin);
-      if (m) el.textContent = m.status === 'live' ? minTxt(m) : 'Selesai';
+      if (m) el.textContent = m.status === 'live' ? minTxt(m) : 'Finished';
     });
     $$('[data-clock]').forEach((el) => {
       const m = matchById(el.dataset.clock);
-      if (m) el.textContent = m.status === 'live' ? minTxt(m) : 'Selesai';
+      if (m) el.textContent = m.status === 'live' ? minTxt(m) : 'Finished';
     });
     const byScore = {};
     $$('[data-score]').forEach((el) => { (byScore[el.dataset.score] = byScore[el.dataset.score] || []).push(el); });
@@ -358,7 +358,7 @@
     if (i >= 0) arr.splice(i, 1); else arr.push(id);
     save(); render({ preserveScroll: true });
     const name = type === 'team' ? team(id).name : comp(id).name;
-    toast(i >= 0 ? 'Berhenti mengikuti' : 'Diikuti', i >= 0 ? `${name} dihapus dari daftar ikuti.` : `${name} ditambahkan — laga mereka muncul lebih dulu.`, 'info');
+    toast(i >= 0 ? 'Unfollow' : 'Following', i >= 0 ? `${name} removed from your follows.` : `${name} added — their fixtures now come first.`, 'info');
   }
 
   /* ------------------------------- slip -------------------------------- */
@@ -368,8 +368,8 @@
     const src = oddsIndex.get(key);
     const m = matchById(matchId);
     if (!src || !m) return;
-    if (src.isSusp()) { toast('Pilihan ditangguhkan', 'Pasar sedang ditutup sebentar. Coba lagi.', 'warn'); return; }
-    if (m.status === 'finished') { toast('Pasar ditutup', 'Pertandingan ini sudah selesai.', 'warn'); return; }
+    if (src.isSusp()) { toast('Selection suspended', 'Market is briefly closed. Try again.', 'warn'); return; }
+    if (m.status === 'finished') { toast('Market closed', 'This match has finished.', 'warn'); return; }
     const i = state.slip.findIndex((s) => s.key === key);
     if (i >= 0) {
       state.slip.splice(i, 1);
@@ -391,11 +391,11 @@
   function hasChanged() { return state.slip.some((it) => Math.abs(currentOdds(it.key) - it.odds) >= 0.03); }
   function hasSusp() { return state.slip.some((it) => { const s = oddsIndex.get(it.key); return s && s.isSusp(); }); }
   function slipBlockReason() {
-    if (!state.slip.length) return 'Slip masih kosong.';
-    if (hasSusp()) return 'Ada pilihan yang sedang ditangguhkan.';
-    if (hasChanged()) return 'Terima odds baru sebelum memasang.';
-    if (state.slip.some((it) => stakeOf(it) < 1)) return 'Stake minimum 1.00 USDT.';
-    if (totalStake() > state.balance) return 'Saldo demo tidak cukup.';
+    if (!state.slip.length) return 'Your slip is empty.';
+    if (hasSusp()) return 'A selection is suspended.';
+    if (hasChanged()) return 'Accept the new odds before placing.';
+    if (state.slip.some((it) => stakeOf(it) < 1)) return 'Minimum stake is 1.00 USDT.';
+    if (totalStake() > state.balance) return 'Demo balance is too low.';
     return '';
   }
 
@@ -405,12 +405,12 @@
     it.odds = currentOdds(key);
     it.acceptedAt = Date.now();
     save(); refreshSlipSurfaces();
-    toast('Odds diperbarui', `${it.label} · ${oddsFmt(it.odds)}`, 'info');
+    toast('Odds updated', `${it.label} · ${oddsFmt(it.odds)}`, 'info');
   }
   function declineOdds(key) {
     state.slip = state.slip.filter((s) => s.key !== key);
     save(); render({ preserveScroll: true });
-    toast('Pilihan dibatalkan', 'Odds berubah dan tidak diterima.', 'warn');
+    toast('Selection removed', 'Odds moved and were not accepted.', 'warn');
   }
 
   function placeBets() {
@@ -420,10 +420,10 @@
     const snapshot = state.slip.map((s) => ({ ...s }));
     setTimeout(() => {
       if (Math.random() < 0.12) {
-        const reason = Math.random() > 0.5 ? 'Pasar ditutup saat taruhan diproses.' : 'Odds berubah sebelum taruhan diterima.';
+        const reason = Math.random() > 0.5 ? 'Market closed while the bet was processing.' : 'Odds moved before the bet was accepted.';
         state.lastError = reason;
         save(); refreshSlipSurfaces();
-        toast('Taruhan gagal', reason + ' Tidak ada dana yang dipotong.', 'err');
+        toast('Bet failed', reason + ' No funds were deducted.', 'err');
         return;
       }
       snapshot.forEach((s) => {
@@ -441,7 +441,7 @@
       state.mbTab = 'open';
       save();
       render();
-      toast('Taruhan ditempatkan', `${snapshot.length} taruhan tunggal · ${money(snapshot.reduce((a, s) => a + stakeOf(s), 0))} USDT`, 'ok');
+      toast('Bet placed', `${snapshot.length} singles · ${money(snapshot.reduce((a, s) => a + stakeOf(s), 0))} USDT`, 'ok');
     }, 950);
   }
 
@@ -454,7 +454,7 @@
     state.balance = Math.round((state.balance + val) * 100) / 100;
     state.cashConfirm = null;
     save(); render({ preserveScroll: true });
-    toast('Cash out berhasil', `${money(val)} USDT masuk ke saldo demo.`, 'ok');
+    toast('Cash out complete', `${money(val)} USDT masuk ke demo balance.`, 'ok');
   }
 
   /* --------------------------- slip rendering -------------------------- */
@@ -464,7 +464,7 @@
     const susp = (oddsIndex.get(it.key) || { isSusp: () => false }).isSusp();
     const changed = Math.abs(live - it.odds) >= 0.03;
     const ret = stakeOf(it) * it.odds;
-    const mins = m ? `${team(m.home).name} v ${team(m.away).name}` : 'Pertandingan';
+    const mins = m ? `${team(m.home).name} v ${team(m.away).name}` : 'Matches';
     return `
       <div class="slip-item" data-si="${esc(it.key)}">
         <div class="si-top">
@@ -475,21 +475,21 @@
           </div>
           <div class="si-right">
             <div class="si-odds ${changed || susp ? 'changed' : ''}">
-              <span class="k">${changed ? 'Odds baru' : 'Odds'}</span>
+              <span class="k">${changed ? 'New odds' : 'Odds'}</span>
               <span class="v">${oddsFmt(live)}</span>
             </div>
-            <button class="si-x" data-act="remove-sel" data-key="${esc(it.key)}" aria-label="Hapus ${esc(it.label)} dari slip">${ic('x', 14)}</button>
+            <button class="si-x" data-act="remove-sel" data-key="${esc(it.key)}" aria-label="Remove ${esc(it.label)} from slip">${ic('x', 14)}</button>
           </div>
         </div>
         <div class="si-stake">
           <label class="stake-field">
-            <input type="text" inputmode="decimal" value="${it.stake}" data-stake="${esc(it.key)}" aria-label="Stake untuk ${esc(it.label)}" />
+            <input type="text" inputmode="decimal" value="${it.stake}" data-stake="${esc(it.key)}" aria-label="Stake for ${esc(it.label)}" />
             <span class="cur">USDT</span>
           </label>
           ${[10, 25, 50].map((v) => `<button class="stake-chip" data-act="stake-set" data-key="${esc(it.key)}" data-v="${v}">${v}</button>`).join('')}
-          <button class="stake-chip" data-act="stake-set" data-key="${esc(it.key)}" data-v="max">Maks</button>
+          <button class="stake-chip" data-act="stake-set" data-key="${esc(it.key)}" data-v="max">Max</button>
           <div class="si-return">
-            <span>Potensi kembali</span>
+            <span>Potential return</span>
             <b data-return="${esc(it.key)}">${money(ret)} USDT</b>
           </div>
         </div>
@@ -499,15 +499,15 @@
 
   function warnHTML(it, susp, changed) {
     if (susp) {
-      return `<div class="si-warn danger"><span class="grow">Pilihan sedang ditangguhkan. Tunggu pasar dibuka kembali.</span>
-        <div class="acts"><button class="mini-btn" data-act="remove-sel" data-key="${esc(it.key)}">Hapus</button></div></div>`;
+      return `<div class="si-warn danger"><span class="grow">Selection suspended. Wait for the market to reopen.</span>
+        <div class="acts"><button class="mini-btn" data-act="remove-sel" data-key="${esc(it.key)}">Remove</button></div></div>`;
     }
     if (changed) {
       const live = currentOdds(it.key);
-      return `<div class="si-warn"><span class="grow">Odds berubah ${oddsFmt(it.odds)} → <b>${oddsFmt(live)}</b>. Kamu harus menerima odds baru.</span>
+      return `<div class="si-warn"><span class="grow">Odds moved ${oddsFmt(it.odds)} → <b>${oddsFmt(live)}</b>. You must accept the new odds.</span>
         <div class="acts">
-          <button class="mini-btn solid" data-act="accept-odds" data-key="${esc(it.key)}">Terima</button>
-          <button class="mini-btn" data-act="decline-odds" data-key="${esc(it.key)}">Batalkan</button>
+          <button class="mini-btn solid" data-act="accept-odds" data-key="${esc(it.key)}">Accept</button>
+          <button class="mini-btn" data-act="decline-odds" data-key="${esc(it.key)}">Decline</button>
         </div></div>`;
     }
     return '';
@@ -519,16 +519,16 @@
     const reason = slipBlockReason();
     return `
       <div class="slip-summary">
-        <div class="sum-row"><span>Taruhan tunggal</span><span class="v">${state.slip.length} pilihan</span></div>
+        <div class="sum-row"><span>Singles</span><span class="v">${state.slip.length} ${state.slip.length === 1 ? 'selection' : 'selections'}</span></div>
         <div class="sum-row"><span>Total stake</span><span class="v">${money(stake)} USDT</span></div>
         <div class="sum-total">
-          <span class="l">Potensi kembali</span>
+          <span class="l">Potential return</span>
           <span class="v" data-total-return>${money(ret)}<small>USDT</small></span>
         </div>
         <button class="btn btn-primary btn-block place-btn" data-act="place" data-place ${state.slip.length && !reason ? '' : 'disabled'}>
-          ${ic('ticket', 17)} ${state.slip.length ? `Pasang ${state.slip.length} taruhan` : 'Slip kosong'}
+          ${ic('ticket', 17)} ${state.slip.length ? `Place ${state.slip.length} ${state.slip.length === 1 ? 'bet' : 'bets'}` : 'Slip empty'}
         </button>
-        <div class="sum-note">${ic('shield', 14)}<span>${reason || 'Odds desimal · stake dalam USDT · saldo demo, bukan uang nyata.'}</span></div>
+        <div class="sum-note">${ic('shield', 14)}<span>${reason || 'Decimal odds · stakes in USDT · demo balance, not real money.'}</span></div>
       </div>`;
   }
 
@@ -536,14 +536,14 @@
     return `
       <div class="empty">
         <div class="mark">${ic('ticket', 24)}</div>
-        <h3>Slip kamu kosong</h3>
-        <p>Ketuk salah satu odds untuk mulai. Satu pilihan = satu taruhan tunggal.</p>
+        <h3>Your slip is empty</h3>
+        <p>Tap any odds to start. One selection = one single bet.</p>
         <div class="steps">
-          <div class="step"><div class="k">01</div><div class="t">Pilih odds pada laga</div></div>
-          <div class="step"><div class="k">02</div><div class="t">Atur stake USDT</div></div>
-          <div class="step"><div class="k">03</div><div class="t">Pasang & pantau</div></div>
+          <div class="step"><div class="k">01</div><div class="t">Pick odds on a match</div></div>
+          <div class="step"><div class="k">02</div><div class="t">Set your USDT stake</div></div>
+          <div class="step"><div class="k">03</div><div class="t">Place & track</div></div>
         </div>
-        <a class="btn btn-ghost btn-sm" href="#/live">Jelajahi pertandingan live ${ic('arrow-r', 15)}</a>
+        <a class="btn btn-ghost btn-sm" href="#/live">Browse live matches ${ic('arrow-r', 15)}</a>
       </div>`;
   }
 
@@ -552,10 +552,10 @@
     return `
       <div class="card">
         <div class="card-head">
-          <h3>Slip taruhan <span class="n">${state.slip.length}</span></h3>
+          <h3>Bet slip <span class="n">${state.slip.length}</span></h3>
           <span class="spacer"></span>
-          ${state.slip.length ? `<button class="btn-quiet btn-sm" data-act="clear-slip">Kosongkan</button>` : ''}
-          ${mode === 'drawer' ? `<button class="iconbtn" data-act="close-drawer" aria-label="Tutup slip">${ic('x', 18)}</button>` : ''}
+          ${state.slip.length ? `<button class="btn-quiet btn-sm" data-act="clear-slip">Clear</button>` : ''}
+          ${mode === 'drawer' ? `<button class="iconbtn" data-act="close-drawer" aria-label="Close bet slip">${ic('x', 18)}</button>` : ''}
         </div>
         ${state.slip.length ? `<div class="slip-list">${list}</div>${slipSummaryHTML()}` : `<div class="card-body">${emptySlipHTML()}</div>`}
       </div>`;
@@ -588,7 +588,7 @@
         if (box) {
           box.classList.toggle('changed', changed || susp);
           const v = box.querySelector('.v'); if (v) v.textContent = oddsFmt(live);
-          const k = box.querySelector('.k'); if (k) k.textContent = changed ? 'Odds baru' : 'Odds';
+          const k = box.querySelector('.k'); if (k) k.textContent = changed ? 'New odds' : 'Odds';
         }
         const warn = root.querySelector('.warn-slot');
         if (warn && warn.dataset.state !== `${susp}|${changed}`) {
@@ -626,13 +626,13 @@
     const pressed = Boolean(slipItem(key));
     const susp = (sel._suspUntil || 0) > Date.now();
     const label = opts.label != null ? opts.label : sel.label;
-    const aria = `${sel.label}, odds ${oddsFmt(sel.odds)}${susp ? ', ditangguhkan' : ''}`;
+    const aria = `${sel.label}, odds ${oddsFmt(sel.odds)}${susp ? ', suspended' : ''}`;
     return `<button class="odd ${susp ? 'susp' : ''}" data-act="odds" data-oddkey="${esc(key)}" data-match="${esc(matchId)}" data-sel="${esc(sel.id)}"
       aria-pressed="${pressed}" aria-label="${esc(aria)}"${susp ? ' aria-disabled="true"' : ''} data-last="${oddsFmt(sel.odds)}">
       <span class="odd-k">${esc(label)}</span>
       <span class="odd-v">${oddsFmt(sel.odds)}</span>
       <span class="delta" aria-hidden="true"></span>
-      ${susp ? '<span class="susp-tag">Ditangguhkan</span>' : ''}
+      ${susp ? '<span class="susp-tag">Suspended</span>' : ''}
     </button>`;
   }
 
@@ -643,9 +643,9 @@
     const parts = [];
     ['h', 'd', 'a'].forEach((p) => {
       if (!(p in m.odds)) return;
-      parts.push(oddBtn(m.id, { id: p, label: p === 'h' ? team(m.home).name : p === 'a' ? team(m.away).name : 'Seri', odds: m.odds[p] }, { label: labels[p] }));
+      parts.push(oddBtn(m.id, { id: p, label: p === 'h' ? team(m.home).name : p === 'a' ? team(m.away).name : 'Draw', odds: m.odds[p] }, { label: labels[p] }));
     });
-    return `<div class="odds" style="--n:${n}" role="group" aria-label="Odds hasil pertandingan">${parts.join('')}</div>`;
+    return `<div class="odds" style="--n:${n}" role="group" aria-label="Odds hasil matches">${parts.join('')}</div>`;
   }
 
   /* ------------------------------ fixtures ----------------------------- */
@@ -658,17 +658,17 @@
       ? `<div class="fx-live"><span class="fx-min" data-live-min="${m.id}"><span class="live-dot"></span>${minTxt(m)}</span>
            <span class="fx-cd">${esc(comp(m.comp).name)}</span></div>`
       : finished
-        ? `<div class="fx-live"><span class="fx-min" style="color:var(--mute)">Selesai</span><span class="fx-cd">${esc(comp(m.comp).name)}</span></div>`
+        ? `<div class="fx-live"><span class="fx-min" style="color:var(--mute)">Finished</span><span class="fx-cd">${esc(comp(m.comp).name)}</span></div>`
         : `<div class="fx-live"><span class="fx-time">${timeHM(m.kickoff)}</span><span class="fx-cd">${dayLabel(m.kickoff)} · <span data-cd="${m.kickoff}">${countdown(m.kickoff)}</span></span></div>`;
     const scoreHTML = live || finished ? `<span class="sc" ${live ? `data-score="${m.id}"` : ''}>${m.score[0]}</span>` : '';
     const scoreHTML2 = live || finished ? `<span class="sc" ${live ? `data-score="${m.id}"` : ''}>${m.score[1]}</span>` : '';
     return `
       <div class="fixture">
         <div class="fx-meta">${meta}</div>
-        <a class="fx-teams" href="#/match/${m.id}" aria-label="Buka ${esc(team(m.home).name)} vs ${esc(team(m.away).name)}">
+        <a class="fx-teams" href="#/match/${m.id}" aria-label="Open ${esc(team(m.home).name)} vs ${esc(team(m.away).name)}">
           <div class="fx-team ${awayLead ? 'lose' : ''}">${crest(m.home)}<span class="nm">${esc(team(m.home).name)}</span>${scoreHTML}</div>
           <div class="fx-team ${homeLead ? 'lose' : ''}">${crest(m.away)}<span class="nm">${esc(team(m.away).name)}</span>${scoreHTML2}</div>
-          ${opts.hideComp ? '' : `<div class="fx-sub">${esc(comp(m.comp).name)} <span class="dot"></span> ${esc(m.round || comp(m.comp).country || '')}</div>`}
+          ${opts.hideComp ? '' : `<div class="fx-sub">${esc(m.round || '')}${m.round ? ' <span class="dot"></span> ' : ''}${esc(comp(m.comp).country || '')}</div>`}
         </a>
         <div class="fx-odds">${oddsSet(m)}</div>
       </div>`;
@@ -683,7 +683,7 @@
           <span class="lc-comp">${esc(comp(m.comp).name)}</span>
           <span class="lc-min"><span class="live-dot" aria-hidden="true"></span><span data-live-clock="${m.id}">${minTxt(m)}</span></span>
         </a>
-        <a href="#/match/${m.id}" class="lc-teams" aria-label="Buka pertandingan ${esc(team(m.home).name)} vs ${esc(team(m.away).name)}">
+        <a href="#/match/${m.id}" class="lc-teams" aria-label="Open ${esc(team(m.home).name)} vs ${esc(team(m.away).name)}">
           <div class="lc-team ${homeLead ? 'lead' : ''}">${crest(m.home)}<span class="nm">${esc(team(m.home).name)}</span><span class="sc" data-score="${m.id}">${m.score[0]}</span></div>
           <div class="lc-team ${awayLead ? 'lead' : ''}">${crest(m.away)}<span class="nm">${esc(team(m.away).name)}</span><span class="sc" data-score="${m.id}">${m.score[1]}</span></div>
         </a>
@@ -691,11 +691,11 @@
       </article>`;
   }
 
-  function followBtn(type, id, compact) {
+  function followBtn(type, id, compact, withCrest) {
     const on = type === 'team' ? isFollowingTeam(id) : isFollowingComp(id);
     const name = type === 'team' ? team(id).name : comp(id).name;
-    return `<button class="follow ${on ? 'on' : ''}" data-act="follow-${type}" data-id="${id}" aria-pressed="${on}" aria-label="${on ? 'Berhenti mengikuti' : 'Ikuti'} ${esc(name)}">
-      ${ic(on ? 'star-fill' : 'star', compact ? 12 : 13)}<span>${on ? 'Diikuti' : 'Ikuti'}</span></button>`;
+    return `<button class="follow ${on ? 'on' : ''}" data-act="follow-${type}" data-id="${id}" aria-pressed="${on}" aria-label="${on ? 'Unfollow' : 'Follow'} ${esc(name)}">
+      ${withCrest && type === 'team' ? crest(id, 'sm') : ic(on ? 'star-fill' : 'star', compact ? 12 : 13)}<span>${on ? 'Following' : 'Follow'}</span></button>`;
   }
 
   function listHead(compId) {
@@ -716,22 +716,22 @@
     const others = live.filter((m) => m.id !== featured.id).slice(0, 3);
     const soon = MATCHES.filter((m) => m.status === 'upcoming').sort((a, b) => a.kickoff - b.kickoff).slice(0, 4);
     const hour = new Date().getHours();
-    const greeting = hour < 11 ? 'Selamat pagi' : hour < 15 ? 'Selamat siang' : hour < 19 ? 'Selamat sore' : 'Selamat malam';
+    const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
     const soonCount = MATCHES.filter((m) => m.status === 'upcoming' && m.kickoff - Date.now() < 36e5).length;
     return `
     <div class="page">
-      <div class="eyebrow" style="margin-bottom:8px">${greeting} · ${timeHM(Date.now())} WIB</div>
+      <div class="eyebrow" style="margin-bottom:8px">${greeting} · ${timeHM(Date.now())} local</div>
       <div class="sec-head" style="margin-bottom:14px">
-        <h1 class="display">Malam ini di lapangan.</h1>
+        <h1 class="display">Tonight on the pitch.</h1>
       </div>
       <div class="meta-strip" style="margin:0 0 18px">
-        <span class="it"><span class="live-dot"></span><b>${live.length}</b> pertandingan live</span>
-        <span class="it">${ic('clock', 13)}<b>${soonCount}</b> mulai dalam 1 jam</span>
-        <span class="it">${ic('wallet', 13)}Saldo demo <b>${money(state.balance)} USDT</b></span>
+        <span class="it"><span class="live-dot"></span><b>${live.length}</b> live matches</span>
+        <span class="it">${ic('clock', 13)}<b>${soonCount}</b> starting within an hour</span>
+        <span class="it">${ic('wallet', 13)}Demo balance <b>${money(state.balance)} USDT</b></span>
       </div>
 
       <div class="chips" style="margin-bottom:20px">
-        <a class="chip active" href="#/live">Semua olahraga</a>
+        <a class="chip active" href="#/live">All sports</a>
         ${SPORTS.slice(0, 5).map((s) => `<a class="chip" href="#/live" data-act="sport-link" data-sport="${s.id}">${ic(s.icon, 14)}${s.name}<span class="n">${MATCHES.filter((m) => m.sport === s.id && m.status === 'live').length}</span></a>`).join('')}
       </div>
 
@@ -739,10 +739,10 @@
 
       <section class="section">
         <div class="sec-head">
-          <h2>Live sekarang</h2>
-          <span class="meta">${live.length} pertandingan</span>
+          <h2>Live now</h2>
+          <span class="meta">${live.length} matches</span>
           <span class="spacer"></span>
-          <a class="sec-link" href="#/live">Lihat semua ${ic('arrow-r', 14)}</a>
+          <a class="sec-link" href="#/live">See all ${ic('arrow-r', 14)}</a>
         </div>
         <div class="live-grid stagger">
           ${others.map(liveCard).join('')}
@@ -751,10 +751,10 @@
 
       <section class="section">
         <div class="sec-head">
-          <h2>Segera mulai</h2>
-          <span class="meta">dalam 3 jam</span>
+          <h2>Starting soon</h2>
+          <span class="meta">next 3 hours</span>
           <span class="spacer"></span>
-          <a class="sec-link" href="#/football">Sepak bola ${ic('arrow-r', 14)}</a>
+          <a class="sec-link" href="#/football">Football ${ic('arrow-r', 14)}</a>
         </div>
         <div class="panel-list">
           ${soon.map((m) => fixtureRow(m)).join('')}
@@ -763,8 +763,8 @@
 
       <section class="section">
         <div class="sec-head">
-          <h2>Kompetisi populer</h2>
-          <span class="meta">5 liga</span>
+          <h2>Top competitions</h2>
+          <span class="meta">5 leagues</span>
         </div>
         <div class="comp-grid">
           ${['pl', 'ucl', 'lal', 'sa', 'bun'].map((id) => compTile(id)).join('')}
@@ -788,16 +788,16 @@
           <span class="sep"></span>${esc(c.name)}
           <span class="sep"></span>${esc(m.round || '')}
         </div>
-        <h1 class="display">Pasar bergerak,<br><em>tiap</em> detik.</h1>
-        <p class="spot-note">Skor dan menit di prototipe ini hidup sendiri. Pasar berubah tiap beberapa detik — slip akan meminta konfirmasi kalau odds bergeser.</p>
+        <h1 class="display">Odds move,<br><em>every</em> second.</h1>
+        <p class="spot-note">Scores and clocks run on their own here. Markets shift every few seconds — your slip asks you to confirm when odds move.</p>
         <div class="spot-actions">
-          <a class="btn btn-primary" href="#/match/${m.id}">Buka pertandingan ${ic('arrow-r', 16)}</a>
-          <a class="btn btn-ghost" href="#/live">Semua live</a>
+          <a class="btn btn-primary" href="#/match/${m.id}">Open match ${ic('arrow-r', 16)}</a>
+          <a class="btn btn-ghost" href="#/live">All live</a>
         </div>
         <div class="meta-strip">
           <span class="it">${ic('clock', 13)}<b>${esc(m.venue || '')}</b></span>
-          <span class="it">${ic('ticket', 13)}<b>${(m.markets || []).length}</b> grup pasar</span>
-          <span class="it">${ic('shield', 13)}Pasar dapat ditangguhkan</span>
+          <span class="it">${ic('ticket', 13)}<b>${(m.markets || []).length}</b> market groups</span>
+          <span class="it">${ic('shield', 13)}Markets can be suspended</span>
         </div>
       </div>
       <div class="spot-board">
@@ -808,7 +808,7 @@
         <div class="sb-team ${m.score[0] > m.score[1] ? 'lead' : ''}">${crest(m.home, 'lg')}<span class="nm">${esc(team(m.home).name)}</span><span class="sc" data-score="${m.id}">${m.score[0]}</span></div>
         <div class="sb-team ${m.score[1] > m.score[0] ? 'lead' : ''}">${crest(m.away, 'lg')}<span class="nm">${esc(team(m.away).name)}</span><span class="sc" data-score="${m.id}">${m.score[1]}</span></div>
         <div class="sb-foot">
-          <span>${minTxt(m)} · Babak 2</span>
+          <span>${minTxt(m)} · 2nd half</span>
           ${oddsSet(m)}
         </div>
       </div>
@@ -820,16 +820,16 @@
     const n = MATCHES.filter((m) => m.comp === id).length;
     const live = MATCHES.filter((m) => m.comp === id && m.status === 'live').length;
     return `<div class="comptile ${cls}">
-      <a class="tile-link" href="#/football" data-act="open-comp" data-comp="${id}" aria-label="Buka ${esc(c.name)}"></a>
+      <a class="tile-link" href="#/football" data-act="open-comp" data-comp="${id}" aria-label="Open ${esc(c.name)}"></a>
       <span class="comp-mark" style="--h:${c.tint}">${esc(c.mark)}</span>
-      <div class="comp-txt"><div class="nm">${esc(c.name)}</div><div class="ct">${live ? `<span style="color:var(--coral)">${live} live</span> · ` : ''}${n} pertandingan</div></div>
+      <div class="comp-txt"><div class="nm">${esc(c.name)}</div><div class="ct">${live ? `<span style="color:var(--coral)">${live} live</span> · ` : ''}${n} matches</div></div>
       <span class="comp-tile-follow">${followBtn('comp', id, true)}</span>
     </div>`;
   }
 
   function pageLive() {
     const sport = state.liveSport || 'all';
-    const sportName = sport === 'all' ? 'semua olahraga' : (SPORTS.find((s) => s.id === sport) || {}).name;
+    const sportName = sport === 'all' ? 'all sports' : (SPORTS.find((s) => s.id === sport) || {}).name;
     const only = state.onlyFollowed;
     let list = MATCHES.filter((m) => m.status === 'live');
     if (sport !== 'all') list = list.filter((m) => m.sport === sport);
@@ -846,19 +846,19 @@
       <div class="sec-head" style="align-items:flex-start;margin-bottom:6px">
         <div>
           <div class="eyebrow" style="margin-bottom:9px"><span class="live-chip"><span class="live-dot"></span>Live</span><span class="sep"></span>${esc(sportName)}</div>
-          <h1 class="display">Semua yang hidup,<br><em>sekarang.</em></h1>
+          <h1 class="display">Everything in play,<br><em>right now.</em></h1>
         </div>
         <span class="spacer"></span>
         <div style="text-align:right">
           <div class="num" style="font-family:var(--serif);font-size:36px;line-height:1;color:var(--aqua)">${list.length}</div>
-          <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-top:4px">pertandingan</div>
-          <div style="font-size:10px;color:var(--faint);margin-top:6px">diperbarui <span data-updated>baru saja</span></div>
+          <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-top:4px">matches</div>
+          <div style="font-size:10px;color:var(--faint);margin-top:6px">updated <span data-updated>just now</span></div>
         </div>
       </div>
 
       <div class="toolbar" style="margin-top:18px">
         <div class="chips">
-          <button class="chip ${sport === 'all' ? 'active' : ''}" data-act="live-sport" data-sport="all">Semua<span class="n">${MATCHES.filter((m) => m.status === 'live').length}</span></button>
+          <button class="chip ${sport === 'all' ? 'active' : ''}" data-act="live-sport" data-sport="all">All<span class="n">${MATCHES.filter((m) => m.status === 'live').length}</span></button>
           ${SPORTS.map((s) => {
             const n = MATCHES.filter((m) => m.status === 'live' && m.sport === s.id).length;
             return `<button class="chip ${sport === s.id ? 'active' : ''}" data-act="live-sport" data-sport="${s.id}">${ic(s.icon, 14)}${s.name}<span class="n">${n}</span></button>`;
@@ -866,14 +866,14 @@
         </div>
         <div class="right">
           <label class="select">
-            <select data-act="live-comp" aria-label="Filter kompetisi">
-              <option value="all">Semua kompetisi</option>
+            <select data-act="live-comp" aria-label="Filter competition">
+              <option value="all">All competitions</option>
               ${compsAvailable.map((id) => `<option value="${id}" ${compFilter === id ? 'selected' : ''}>${esc(comp(id).name)}</option>`).join('')}
             </select>
           </label>
           <label class="toggle">
             <input type="checkbox" data-act="only-followed" ${only ? 'checked' : ''} />
-            <span class="sw"></span><span>Diikuti</span>
+            <span class="sw"></span><span>Following</span>
           </label>
         </div>
       </div>
@@ -887,15 +887,15 @@
         </section>`).join('') : `
         <div class="empty" style="margin-top:18px">
           <div class="mark">${ic('live', 24)}</div>
-          <h3>Tidak ada yang live</h3>
-          <p>Tidak ada pertandingan ${esc(sportName)} yang sedang berlangsung dengan filter ini. Berikut yang segera mulai.</p>
+          <h3>Nothing live right now</h3>
+          <p>No ${esc(sportName)} match is in play with these filters. Here is what starts soon.</p>
         </div>
         <section class="section">
-          <div class="sec-head"><h2>Segera mulai</h2><span class="meta">3 laga terdekat</span></div>
+          <div class="sec-head"><h2>Starting soon</h2><span class="meta">next 3 fixtures</span></div>
           <div class="panel-list">${soon.map((m) => fixtureRow(m)).join('')}</div>
         </section>`}
 
-      ${list.length ? `<p style="font-size:10.5px;color:var(--faint);margin-top:18px">Skor dan menit adalah data contoh yang bergerak otomatis untuk prototipe.</p>` : ''}
+      ${list.length ? `<p style="font-size:10.5px;color:var(--faint);margin-top:18px">Scores and clocks are sample data that update automatically.</p>` : ''}
     </div>`;
   }
 
@@ -914,27 +914,27 @@
 
     return `
     <div class="page">
-      <div class="eyebrow" style="margin-bottom:9px"><span class="live-chip"><span class="live-dot"></span>Live</span><span class="sep"></span>5 liga top Eropa</div>
+      <div class="eyebrow" style="margin-bottom:9px"><span class="live-chip"><span class="live-dot"></span>Live</span><span class="sep"></span>5 top European leagues</div>
       <div class="sec-head" style="margin-bottom:4px">
-        <h1 class="display">Sepak bola,<br><em>tanpa</em> kebisingan.</h1>
+        <h1 class="display">Football,<br><em>without</em> the noise.</h1>
         <span class="spacer"></span>
         <div class="toolbar" style="margin:0">
           <label class="toggle">
             <input type="checkbox" data-act="only-followed" ${state.onlyFollowed ? 'checked' : ''} />
-            <span class="sw"></span><span>Hanya diikuti</span>
+            <span class="sw"></span><span>Following only</span>
           </label>
         </div>
       </div>
-      <p style="font-size:12.5px;color:var(--mute);max-width:52ch;margin-bottom:18px">Ikuti tim atau kompetisi untuk menaruh laga mereka di paling atas. Odds hasil pertandingan ada di setiap baris.</p>
+      <p style="font-size:12.5px;color:var(--mute);max-width:52ch;margin-bottom:18px">Follow a team or competition to pin their fixtures to the top. Match-result odds sit on every row.</p>
 
       <div class="tabs" role="tablist">
-        <button class="tab ${active === 'all' ? 'active' : ''}" data-act="football-tab" data-comp="all">Semua <span class="n">${MATCHES.filter((m) => m.sport === 'football').length}</span></button>
+        <button class="tab ${active === 'all' ? 'active' : ''}" data-act="football-tab" data-comp="all">All <span class="n">${MATCHES.filter((m) => m.sport === 'football').length}</span></button>
         ${comps.map((id) => `<button class="tab ${active === id ? 'active' : ''}" data-act="football-tab" data-comp="${id}">${esc(comp(id).name)} <span class="n">${MATCHES.filter((m) => m.comp === id).length}</span></button>`).join('')}
       </div>
 
       ${followed.length ? `
       <section class="section" style="margin-top:0">
-        <div class="sec-head"><h2>Untukmu</h2><span class="meta">tim yang kamu ikuti</span></div>
+        <div class="sec-head"><h2>For you</h2><span class="meta">teams you follow</span></div>
         <div class="panel-list">${followed.sort(sortM).map((m) => fixtureRow(m)).join('')}</div>
       </section>` : ''}
 
@@ -947,12 +947,12 @@
         </section>`).join('') : `
         <div class="empty" style="margin-top:10px">
           <div class="mark">${ic('ball', 24)}</div>
-          <h3>Belum ada laga di sini</h3>
-          <p>Coba pilih liga lain, atau matikan filter “Hanya diikuti”.</p>
-          <button class="btn btn-ghost btn-sm" data-act="football-tab" data-comp="all">Lihat semua liga</button>
+          <h3>No fixtures here yet</h3>
+          <p>Try another league, or turn off “Following only”.</p>
+          <button class="btn btn-ghost btn-sm" data-act="football-tab" data-comp="all">See all leagues</button>
         </div>`}
 
-      <p style="font-size:10.5px;color:var(--faint);margin-top:18px">Odds desimal. Pasar dapat ditangguhkan kapan saja. Data contoh.</p>
+      <p style="font-size:10.5px;color:var(--faint);margin-top:18px">Decimal odds. Markets can be suspended at any time. Sample data.</p>
     </div>`;
   }
 
@@ -969,7 +969,7 @@
     return `
     <div class="page">
       <nav class="breadcrumb" aria-label="Remah roti">
-        <a href="#/football">Sepak bola</a>${ic('chev', 12)}
+        <a href="#/football">Football</a>${ic('chev', 12)}
         <a href="#/football">${esc(c.name)}</a>${ic('chev', 12)}
         <span style="color:var(--txt-2)">${esc(team(m.home).name)} v ${esc(team(m.away).name)}</span>
       </nav>
@@ -977,15 +977,15 @@
       <section class="scoreboard">
         <div class="sb-crumb">
           <span>${esc(c.name)}</span><span class="sep" style="width:3px;height:3px;border-radius:50%;background:var(--faint)"></span>
-          <span>${esc(m.round || 'Pekan ini')}</span><span class="sep" style="width:3px;height:3px;border-radius:50%;background:var(--faint)"></span>
-          <span>${esc(m.venue || 'Stadion')}</span>
+          <span>${esc(m.round || 'This week')}</span><span class="sep" style="width:3px;height:3px;border-radius:50%;background:var(--faint)"></span>
+          <span>${esc(m.venue || 'Stadium')}</span>
         </div>
         <div class="sb-main">
           <div class="sb-side">
             ${crest(m.home, 'lg')}
             <div style="min-width:0">
               <div class="nm">${esc(team(m.home).name)}</div>
-              <div class="sub">${isFollowingTeam(m.home) ? 'Diikuti' : 'Tuan rumah'}</div>
+              <div class="sub">Home</div>
             </div>
           </div>
           <div style="display:grid;justify-items:center">
@@ -996,9 +996,9 @@
             </div>
             <div class="sb-clock">
               ${live
-                ? `<span class="clk"><span class="live-dot"></span><span data-clock="${m.id}">${minTxt(m)}</span> · Babak 2</span>`
+                ? `<span class="clk"><span class="live-dot"></span><span data-clock="${m.id}">${minTxt(m)}</span> · 2nd half</span>`
                 : m.status === 'finished'
-                  ? `<span class="clk" style="color:var(--mute);background:rgba(255,255,255,.05);border-color:var(--line)">Selesai</span>`
+                  ? `<span class="clk" style="color:var(--mute);background:rgba(255,255,255,.05);border-color:var(--line)">Finished</span>`
                   : `<span class="clk" style="color:var(--amber);background:rgba(242,180,92,.1);border-color:rgba(242,180,92,.24)">Mulai ${timeHM(m.kickoff)}</span>`}
             </div>
           </div>
@@ -1006,27 +1006,27 @@
             ${crest(m.away, 'lg')}
             <div style="min-width:0">
               <div class="nm">${esc(team(m.away).name)}</div>
-              <div class="sub">${isFollowingTeam(m.away) ? 'Diikuti' : 'Tandang'}</div>
+              <div class="sub">Away</div>
             </div>
           </div>
         </div>
         ${live ? `<div class="sb-progress"><i style="width:${progress}%"></i></div>` : ''}
         <div class="sb-minirow">
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <span style="color:var(--txt-2)">Odds desimal</span>
+            <span style="color:var(--txt-2)">Decimal odds</span>
             <span>·</span>
-            <span>${market ? market.groups.length : 0} grup pasar</span>
+            <span>${market ? market.groups.length : 0} market groups</span>
             <span>·</span>
-            <span>Pasar bisa ditangguhkan</span>
+            <span>Markets can be suspended</span>
           </div>
           <div class="sb-actions">
-            ${followBtn('team', m.home)}${followBtn('team', m.away)}
+            ${followBtn('team', m.home, false, true)}${followBtn('team', m.away, false, true)}
           </div>
         </div>
       </section>
 
       <div class="market-tabs">
-        <div class="tabs" role="tablist" aria-label="Grup pasar">
+        <div class="tabs" role="tablist" aria-label="Market groups">
           ${(m.markets || []).map((mk) => `<button class="tab ${market && mk.id === market.id ? 'active' : ''}" data-act="market-tab" data-market="${mk.id}">${esc(mk.name)}</button>`).join('')}
         </div>
       </div>
@@ -1037,7 +1037,7 @@
           return `<div class="market" data-group="${esc(g.name)}">
             <div class="mk-head">
               <span class="t">${esc(g.name)}</span>
-              ${anySusp ? '<span class="mk-susp">Ditangguhkan</span>' : `<span class="n">${esc(g.note || '')}</span>`}
+              ${anySusp ? '<span class="mk-susp">Suspended</span>' : `<span class="n">${esc(g.note || '')}</span>`}
             </div>
             <div class="mk-body">
               <div class="odds" style="--n:${g.sels.length}">
@@ -1046,10 +1046,10 @@
             </div>
           </div>`;
         }).join('')}
-      </div>` : `<div class="empty"><div class="mark">${ic('ball', 22)}</div><h3>Pasar belum dibuka</h3><p>Pasar untuk pertandingan ini akan muncul mendekati kick-off.</p></div>`}
+      </div>` : `<div class="empty"><div class="mark">${ic('ball', 22)}</div><h3>Markets not open yet</h3><p>Markets for this match appear closer to kick-off.</p></div>`}
 
       ${related.length ? `<section class="section">
-        <div class="sec-head"><h2>Lainnya di ${esc(c.name)}</h2></div>
+        <div class="sec-head"><h2>More in ${esc(c.name)}</h2></div>
         <div class="panel-list">${related.map((x) => fixtureRow(x, { hideComp: true })).join('')}</div>
       </section>` : ''}
     </div>`;
@@ -1064,59 +1064,59 @@
 
     return `
     <div class="page">
-      <div class="eyebrow" style="margin-bottom:9px">Satu halaman · slip dan riwayat</div>
+      <div class="eyebrow" style="margin-bottom:9px">One page · slip and history</div>
       <div class="sec-head" style="margin-bottom:6px">
-        <h1 class="display">Taruhan <em>kamu.</em></h1>
+        <h1 class="display">Your <em>bets.</em></h1>
         <span class="spacer"></span>
         <div style="text-align:right">
           <div class="num" style="font-size:13px;font-weight:600">${money(state.balance)} <span style="font-size:9px;color:var(--mute);letter-spacing:.1em">USDT</span></div>
-          <div style="font-size:9.5px;color:var(--faint);letter-spacing:.12em;text-transform:uppercase;margin-top:2px">saldo demo</div>
+          <div style="font-size:9.5px;color:var(--faint);letter-spacing:.12em;text-transform:uppercase;margin-top:2px">demo balance</div>
         </div>
       </div>
-      <p style="font-size:12.5px;color:var(--mute);max-width:56ch;margin-bottom:18px">Taruhan tunggal saja — satu pilihan, satu tiket. Odds desimal, stake USDT.</p>
+      <p style="font-size:12.5px;color:var(--mute);max-width:56ch;margin-bottom:18px">Singles only — one selection, one ticket. Decimal odds, stakes in USDT.</p>
 
       <div class="seg mobile-only" style="margin-bottom:14px">
         <button class="seg-btn ${state.betsView !== 'mybets' ? 'active' : ''}" data-act="bets-view" data-view="slip">Slip <span class="n">${state.slip.length}</span></button>
-        <button class="seg-btn ${state.betsView === 'mybets' ? 'active' : ''}" data-act="bets-view" data-view="mybets">Taruhan saya <span class="n">${state.bets.length}</span></button>
+        <button class="seg-btn ${state.betsView === 'mybets' ? 'active' : ''}" data-act="bets-view" data-view="mybets">My bets <span class="n">${state.bets.length}</span></button>
       </div>
       <div class="bets-layout">
         <div data-slip-slot class="${state.betsView === 'mybets' ? 'm-hide' : ''}">${slipHTML('page')}</div>
 
         <div class="card ${state.betsView === 'mybets' ? '' : 'm-hide'}">
           <div class="card-head">
-            <h3>Taruhan saya</h3>
+            <h3>My bets</h3>
             <span class="spacer"></span>
             <span style="font-size:10.5px;color:var(--faint)">${state.bets.length} total</span>
           </div>
           <div class="mb-tabs" role="tablist">
-            <button class="mb-tab ${tab === 'open' ? 'active' : ''}" data-act="mb-tab" data-tab="open">Terbuka <span class="n">${openBets.length}</span></button>
-            <button class="mb-tab ${tab === 'settled' ? 'active' : ''}" data-act="mb-tab" data-tab="settled">Selesai <span class="n">${settled.length}</span></button>
+            <button class="mb-tab ${tab === 'open' ? 'active' : ''}" data-act="mb-tab" data-tab="open">Open <span class="n">${openBets.length}</span></button>
+            <button class="mb-tab ${tab === 'settled' ? 'active' : ''}" data-act="mb-tab" data-tab="settled">Settled <span class="n">${settled.length}</span></button>
           </div>
           <div class="bet-list">
             ${listed.length ? listed.map(betHTML).join('') : `<div class="card-body"><div class="empty" style="padding:28px 18px;border:0">
               <div class="mark">${ic('ticket', 22)}</div>
-              <h3>${tab === 'open' ? 'Belum ada taruhan terbuka' : 'Belum ada taruhan selesai'}</h3>
-              <p>${tab === 'open' ? 'Taruhan yang kamu pasang akan muncul di sini dengan nilai cash out.' : 'Riwayat taruhan yang sudah selesai tampil di sini.'}</p>
+              <h3>${tab === 'open' ? 'No open bets yet' : 'No settled bets yet'}</h3>
+              <p>${tab === 'open' ? 'Bets you place appear here with a live cash-out value.' : 'Your settled betting history shows here.'}</p>
             </div></div>`}
           </div>
           ${tab === 'open' && openBets.length ? `<div class="card-foot">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px;color:var(--faint)">
-              <span>Stake terbuka <b style="color:var(--txt-2)">${money(openBets.reduce((a, b) => a + b.stake, 0))} USDT</b></span>
+              <span>Open stake <b style="color:var(--txt-2)">${money(openBets.reduce((a, b) => a + b.stake, 0))} USDT</b></span>
               <span>Cash out <b style="color:var(--aqua)">${money(openBets.reduce((a, b) => a + (b.cashout || 0), 0))} USDT</b></span>
             </div>
           </div>` : ''}
         </div>
       </div>
 
-      ${error ? `<div class="si-warn danger" style="margin-top:16px"><span class="grow">Taruhan terakhir gagal: ${esc(error)}</span><button class="mini-btn" data-act="clear-error">Tutup</button></div>` : ''}
-      <p style="font-size:10.5px;color:var(--faint);margin-top:16px;display:flex;align-items:center;gap:6px">${ic('shield', 13)} Prototipe: tidak ada transaksi nyata, tidak ada data pemain sungguhan.</p>
+      ${error ? `<div class="si-warn danger" style="margin-top:16px"><span class="grow">Last bet failed: ${esc(error)}</span><button class="mini-btn" data-act="clear-error">Dismiss</button></div>` : ''}
+      <p style="font-size:10.5px;color:var(--faint);margin-top:16px;display:flex;align-items:center;gap:6px">${ic('shield', 13)} Prototype: no real transactions, no real player data.</p>
     </div>`;
   }
 
   function betHTML(b) {
     const m = matchById(b.matchId);
-    const label = m ? `${team(m.home).name} v ${team(m.away).name}` : 'Pertandingan contoh';
-    const statusText = { open: 'Terbuka', won: 'Menang', lost: 'Kalah', cashed: 'Diuangkan', void: 'Batal' }[b.status] || b.status;
+    const label = m ? `${team(m.home).name} v ${team(m.away).name}` : 'Sample match';
+    const statusText = { open: 'Open', won: 'Won', lost: 'Lost', cashed: 'Cashed out', void: 'Void' }[b.status] || b.status;
     const confirm = state.cashConfirm === b.id;
     return `
       <div class="bet ${b.fresh ? 'entered' : ''}" data-bet="${b.id}">
@@ -1129,27 +1129,27 @@
         <div class="bet-bottom">
           <div class="bet-money">
             <span>Stake <b>${money(b.stake)}</b></span>
-            ${b.status === 'open' ? '' : `<span>${b.status === 'lost' ? 'Kalah' : 'Kembali'} <b style="color:${b.status === 'lost' ? 'var(--mute)' : 'var(--aqua)'}">${money(b.payout)}</b></span>`}
+            ${b.status === 'open' ? '' : `<span>${b.status === 'lost' ? 'Lost' : 'Returns'} <b style="color:${b.status === 'lost' ? 'var(--mute)' : 'var(--aqua)'}">${money(b.payout)}</b></span>`}
           </div>
           ${b.status === 'open' ? `<button class="cashout" data-act="cashout-ask" data-bet="${b.id}">Cash out <b data-cashval="${b.id}">${money(b.cashout)} USDT</b></button>` : ''}
         </div>
         ${confirm ? `<div class="co-confirm">
-          <span class="grow">Cairkan sekarang untuk <b>${money(b.cashout)} USDT</b>? Nilai bisa berubah saat dikonfirmasi.</span>
-          <div class="acts"><button class="mini-btn solid" data-act="cashout-confirm" data-bet="${b.id}">Ya, cairkan</button><button class="mini-btn" data-act="cashout-cancel">Batal</button></div>
+          <span class="grow">Cash out now for <b>${money(b.cashout)} USDT</b>? The value can change on confirmation.</span>
+          <div class="acts"><button class="mini-btn solid" data-act="cashout-confirm" data-bet="${b.id}">Yes, cash out</button><button class="mini-btn" data-act="cashout-cancel">Cancel</button></div>
         </div>` : ''}
       </div>`;
   }
 
   function notFound() {
-    return `<div class="page"><div class="empty" style="margin-top:40px"><div class="mark">${ic('search', 22)}</div><h3>Halaman tidak ditemukan</h3><p>Tautan ini tidak ada di prototipe.</p><a class="btn btn-ghost btn-sm" href="#/">Kembali ke beranda</a></div></div>`;
+    return `<div class="page"><div class="empty" style="margin-top:40px"><div class="mark">${ic('search', 22)}</div><h3>Page not found</h3><p>This link does not exist in the prototype.</p><a class="btn btn-ghost btn-sm" href="#/">Back to home</a></div></div>`;
   }
 
   /* ------------------------------ chrome ------------------------------- */
   const railItems = [
-    { key: 'home', label: 'Beranda', icon: 'home', href: '#/' },
+    { key: 'home', label: 'Home', icon: 'home', href: '#/' },
     { key: 'live', label: 'Live', icon: 'live', href: '#/live', count: () => MATCHES.filter((m) => m.status === 'live').length },
-    { key: 'football', label: 'Sepak bola', icon: 'ball', href: '#/football' },
-    { key: 'bets', label: 'Taruhan saya', icon: 'ticket', href: '#/bets', count: () => state.bets.length },
+    { key: 'football', label: 'Football', icon: 'ball', href: '#/football' },
+    { key: 'bets', label: 'My bets', icon: 'ticket', href: '#/bets', count: () => state.bets.length },
   ];
   function renderRail() {
     $('#railNav').innerHTML = railItems.map((it) => `
@@ -1182,18 +1182,18 @@
     const soon = MATCHES.filter((m) => m.status === 'upcoming').sort((a, b) => a.kickoff - b.kickoff).slice(0, 2);
     const peek = state.slip.length ? `
       <div class="slip-peek">
-        <h4>Slip kamu <span class="n">${state.slip.length}</span></h4>
+        <h4>Your slip <span class="n">${state.slip.length}</span></h4>
         <div class="rows">
           ${state.slip.slice(0, 3).map((it) => `<div class="row"><span class="sel">${esc(it.label)}</span><span class="ov">${oddsFmt(it.odds)}</span></div>`).join('')}
           ${state.slip.length > 3 ? `<div class="row"><span class="sel">+${state.slip.length - 3} lainnya</span><span class="ov"></span></div>` : ''}
         </div>
-        <div class="tot"><span>Potensi kembali</span><b>${money(totalReturn())} USDT</b></div>
-        <button class="btn btn-primary btn-sm btn-block" data-act="open-drawer">Buka slip ${ic('arrow-r', 14)}</button>
+        <div class="tot"><span>Potential return</span><b>${money(totalReturn())} USDT</b></div>
+        <button class="btn btn-primary btn-sm btn-block" data-act="open-drawer">Open bet slip ${ic('arrow-r', 14)}</button>
       </div>` : '';
     $('#panelBody').innerHTML = `
       ${peek}
       <div>
-        <div class="panel-head"><span class="lbl">Live sekarang</span><span class="ln"></span><a href="#/live">${live.length ? 'semua' : 'lihat'}</a></div>
+        <div class="panel-head"><span class="lbl">Live now</span><span class="ln"></span><a href="#/live">${live.length ? 'all' : 'view'}</a></div>
         ${live.length ? live.map((m) => `
           <a class="mini" href="#/match/${m.id}">
             <span class="mini-min" data-live-clock="${m.id}">${minTxt(m)}</span>
@@ -1202,10 +1202,10 @@
               <span class="${m.score[0] > m.score[1] ? 'win' : ''}" data-score="${m.id}">${m.score[0]}</span>
               <span class="${m.score[1] > m.score[0] ? 'win' : ''}" data-score="${m.id}">${m.score[1]}</span>
             </span>
-          </a>`).join('') : `<p style="font-size:11.5px;color:var(--faint)">Tidak ada laga live.</p>`}
+          </a>`).join('') : `<p style="font-size:11.5px;color:var(--faint)">No live matches right now.</p>`}
       </div>
       <div>
-        <div class="panel-head"><span class="lbl">Segera</span><span class="ln"></span><a href="#/football">semua</a></div>
+        <div class="panel-head"><span class="lbl">Next up</span><span class="ln"></span><a href="#/football">all</a></div>
         ${soon.map((m) => `
           <a class="mini" href="#/match/${m.id}">
             <span class="mini-time">${timeHM(m.kickoff)}</span>
@@ -1214,11 +1214,11 @@
           </a>`).join('')}
       </div>
       <div>
-        <div class="panel-head"><span class="lbl">Ikuti</span><span class="ln"></span></div>
+        <div class="panel-head"><span class="lbl">Follow</span><span class="ln"></span></div>
         <div style="display:flex;flex-wrap:wrap;gap:6px">
           ${state.follows.teams.length
             ? state.follows.teams.map((t) => `<button class="chip" data-act="follow-team" data-id="${t}" style="height:27px;font-size:11px;padding:0 9px">${crest(t, 'sm')}${esc(team(t).short)}${ic('x', 11)}</button>`).join('')
-            : `<p style="font-size:11.5px;color:var(--faint)">Belum ada tim yang diikuti.</p>`}
+            : `<p style="font-size:11.5px;color:var(--faint)">No teams followed yet.</p>`}
         </div>
       </div>`;
   }
@@ -1248,9 +1248,9 @@
     lastRouteKey = key;
     renderDrawerIfOpen();
     document.title = ({
-      home: 'Housebets Sportsbook', live: 'Live · Housebets Sportsbook', football: 'Sepak bola · Housebets Sportsbook',
-      match: `${team((matchById(r.id) || {}).home || '') ? team((matchById(r.id) || {}).home).name + ' v ' + team((matchById(r.id) || {}).away).name : 'Pertandingan'} · Housebets`,
-      bets: 'Slip & taruhan saya · Housebets Sportsbook',
+      home: 'Housebets Sportsbook', live: 'Live · Housebets Sportsbook', football: 'Football · Housebets Sportsbook',
+      match: `${team((matchById(r.id) || {}).home || '') ? team((matchById(r.id) || {}).home).name + ' v ' + team((matchById(r.id) || {}).away).name : 'Matches'} · Housebets`,
+      bets: 'Slip & my bets · Housebets Sportsbook',
     })[r.name] || 'Housebets Sportsbook';
   }
 
@@ -1281,7 +1281,7 @@
     el.innerHTML = `<span class="ic">${ic(icon, 13)}</span>
       <div style="min-width:0"><div class="tt">${esc(title)}</div>${body ? `<div class="tb">${esc(body)}</div>` : ''}
       ${action ? `<button class="link-a" style="margin-top:7px" data-toast-act>${esc(action.label)}</button>` : ''}</div>
-      <button class="x" aria-label="Tutup notifikasi">${ic('x', 13)}</button>`;
+      <button class="x" aria-label="Dismiss notification">${ic('x', 13)}</button>`;
     box.appendChild(el);
     const kill = () => { el.classList.add('out'); setTimeout(() => el.remove(), 260); };
     el.querySelector('.x').addEventListener('click', kill);
@@ -1296,12 +1296,12 @@
     palIndex = [];
     Object.entries(TEAMS).forEach(([id, t]) => {
       const m = MATCHES.find((x) => (x.home === id || x.away === id) && x.status !== 'finished') || MATCHES.find((x) => x.home === id || x.away === id);
-      palIndex.push({ group: 'Tim', name: t.name, sub: comp(t.comp).name, kind: 'team', team: id, match: m && m.id });
+      palIndex.push({ group: 'Teams', name: t.name, sub: comp(t.comp).name, kind: 'team', team: id, match: m && m.id });
     });
-    Object.values(COMPS).forEach((c) => palIndex.push({ group: 'Kompetisi', name: c.name, sub: c.country, kind: 'comp', comp: c.id }));
+    Object.values(COMPS).forEach((c) => palIndex.push({ group: 'Competitions', name: c.name, sub: c.country, kind: 'comp', comp: c.id }));
     PLAYERS.forEach((p) => {
       const m = MATCHES.find((x) => x.home === p.team || x.away === p.team);
-      palIndex.push({ group: 'Pemain', name: p.name, sub: team(p.team).name, kind: 'player', match: m && m.id });
+      palIndex.push({ group: 'Players', name: p.name, sub: team(p.team).name, kind: 'player', match: m && m.id });
     });
     const feats = matchById('ars-bha');
     const seen = new Set();
@@ -1309,9 +1309,9 @@
       const key = `${g.name}|${s.label}`;
       if (seen.has(key)) return;
       seen.add(key);
-      palIndex.push({ group: 'Pasar', name: g.name, sub: `${s.label} · ${oddsFmt(s.odds)}`, kind: 'market', match: 'ars-bha', market: mk.id });
+      palIndex.push({ group: 'Markets', name: g.name, sub: `${s.label} · ${oddsFmt(s.odds)}`, kind: 'market', match: 'ars-bha', market: mk.id });
     })));
-    MATCHES.slice(0, 12).forEach((m) => palIndex.push({ group: 'Pertandingan', name: `${team(m.home).name} v ${team(m.away).name}`, sub: comp(m.comp).name, kind: 'match', match: m.id }));
+    MATCHES.slice(0, 12).forEach((m) => palIndex.push({ group: 'Matches', name: `${team(m.home).name} v ${team(m.away).name}`, sub: comp(m.comp).name, kind: 'match', match: m.id }));
   }
   const norm = (s) => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
@@ -1343,14 +1343,14 @@
       curated.forEach((c) => { if (!uniq.includes(c)) uniq.push(c); });
       items = uniq;
     }
-    // prioritaskan: tim, kompetisi, pertandingan, pemain, pasar
-    const w = { Tim: 0, Kompetisi: 1, Pertandingan: 2, Pemain: 3, Pasar: 4 };
+    // priority: teams, competitions, matches, players, markets
+    const w = { Teams: 0, Competitions: 1, Matches: 2, Players: 3, Markets: 4 };
     items = items.slice().sort((a, b) => (w[a.group] - w[b.group]) || a.name.localeCompare(b.name)).slice(0, 26);
     palFiltered = items;
     palActive = 0;
     const box = $('#paletteResults');
     if (!items.length) {
-      box.innerHTML = `<div class="pal-empty">Tidak ada hasil untuk “${esc(q)}”.<br><span style="font-size:11px;color:var(--faint)">Coba nama tim, pemain, atau kompetisi.</span></div>`;
+      box.innerHTML = `<div class="pal-empty">No results for “${esc(q)}”.<br><span style="font-size:11px;color:var(--faint)">Try a team, player, or competition.</span></div>`;
       return;
     }
     let html = '', last = '';
@@ -1399,9 +1399,9 @@
     if (palItem) { palGo(palFiltered[Number(palItem.dataset.i)]); return; }
     if (e.target === $('#palette')) { closePalette(); return; }
     if (e.target.closest('#searchOpen')) { openPalette(); return; }
-    if (e.target.closest('#alertsBtn')) { toast('Tidak ada notifikasi baru', 'Pasar yang kamu ikuti akan muncul di sini.', 'info'); return; }
+    if (e.target.closest('#alertsBtn')) { toast('No new notifications', 'Markets you follow will show up here.', 'info'); return; }
     if (e.target.closest('#userBtn') || e.target.closest('#balanceChip')) {
-      toast('Akun demo', `Saldo fiktif ${money(state.balance)} USDT. Tidak ada deposit atau penarikan nyata.`, 'info'); return;
+      toast('Demo account', `Play balance ${money(state.balance)} USDT. No real deposits or withdrawals.`, 'info'); return;
     }
 
     const el = e.target.closest('[data-act]');
@@ -1424,7 +1424,7 @@
         state.slip = []; save();
         if (drawer.classList.contains('open')) closeDrawer();
         render({ preserveScroll: true });
-        toast('Slip dikosongkan', 'Semua pilihan dihapus.', 'info'); break;
+        toast('Slip cleared', 'All selections removed.', 'info'); break;
       case 'stake-set': {
         const it = slipItem(el.dataset.key); if (!it) break;
         const v = el.dataset.v === 'max' ? Math.max(1, Math.floor(state.balance / Math.max(1, state.slip.length) * 100) / 100) : Number(el.dataset.v);
@@ -1500,10 +1500,10 @@
     const btn = $('[data-place]');
     if (btn && state.slip.length) {
       btn.disabled = Boolean(reason);
-      btn.innerHTML = `${ic('ticket', 17)} Pasang ${state.slip.length} taruhan`;
+      btn.innerHTML = `${ic('ticket', 17)} Place ${state.slip.length} ${state.slip.length === 1 ? 'bet' : 'bets'}`;
     }
     const note = $('.sum-note span');
-    if (note) note.textContent = reason || 'Odds desimal · stake dalam USDT · saldo demo, bukan uang nyata.';
+    if (note) note.textContent = reason || 'Decimal odds · stakes in USDT · demo balance, not real money.';
     $('#slipBarMeta').textContent = `${money(stake)} USDT · ${money(ret)}`;
   }
 

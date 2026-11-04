@@ -10,6 +10,14 @@ Five pages, one shell, sample data. No login, no backend, no real money.
 > Note: the starter files (site shell + brand pack) were not available to this account, so the shell, palette and
 > typography were derived directly from housebets.com — the wave wordmark, deep marine surfaces and the sea-glass aqua accent.
 
+### Originality
+
+The brief page is public, but no starter-file download is exposed on it (no zip/Drive/GitHub link — only the site's
+Masuk/Daftar nav), so no Housebets shell or brand-pack asset is used here.
+Everything you see is authored for this entry: the layout, the component set, the inline SVG icon sprite and wave mark,
+the typography pairing, the odds/clock engine and all copy. No images, logos or code were taken from housebets.com.
+If the official starter pack becomes available, the prototype can be re-skinned onto it without touching the logic.
+
 ---
 
 ## Run

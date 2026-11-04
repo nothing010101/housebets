@@ -1,6 +1,6 @@
 # Housebets Sportsbook — prototipe kontes
 
-**Live:** https://nothing010101.github.io/housebets/
+**Live:** https://nothing010101.github.io/housebets/ — *Pages build sedang tertahan oleh status billing akun GitHub; lihat “Deploy” di bawah.*
 
 ![Pratinjau sports home](preview.jpg)
 
@@ -11,6 +11,14 @@ Lima halaman, satu shell, data contoh. Tanpa login, tanpa backend, tanpa uang ny
 > diturunkan langsung dari housebets.com — wordmark gelombang, palet marine gelap, aksen aqua sea-glass.
 
 ---
+
+## Deploy
+
+Repo sudah berisi situs statis siap saji (tanpa build).
+
+- **Vercel / Netlify:** import repo `nothing010101/housebets`, framework *Other*, output `.`, tanpa build command.
+- **GitHub Pages:** Settings → Pages → Source: *Deploy from a branch* → `main` / root.
+  URL: https://nothing010101.github.io/housebets/ (build baru berjalan setelah masalah billing akun GitHub diselesaikan).
 
 ## Jalankan
 

@@ -861,7 +861,6 @@
           <button class="chip ${sport === 'all' ? 'active' : ''}" data-act="live-sport" data-sport="all">Semua<span class="n">${MATCHES.filter((m) => m.status === 'live').length}</span></button>
           ${SPORTS.map((s) => {
             const n = MATCHES.filter((m) => m.status === 'live' && m.sport === s.id).length;
-            if (!n) return '';
             return `<button class="chip ${sport === s.id ? 'active' : ''}" data-act="live-sport" data-sport="${s.id}">${ic(s.icon, 14)}${s.name}<span class="n">${n}</span></button>`;
           }).join('')}
         </div>
